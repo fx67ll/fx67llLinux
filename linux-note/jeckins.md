@@ -16,4 +16,4 @@
 
 ### 在 Linux 中使用 yum 安装 Jeckins
 1. 因为Jeckins是Java编写的，所以必须要先使用yum安装JDK，这里是安装JDK1.8的步骤
-	> 先获取java相关版本：yum -y list java*
+	> 先获取java相关版本：yum -y list java
