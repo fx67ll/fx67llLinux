@@ -5,6 +5,7 @@
 + 配置防火墙的端口
 + 启动nginx
 	> `/usr/sbin/nginx`  
+	> `nginx -c /etc/nginx/nginx.conf`
 + 关闭nginx
 	> `nginx -s stop`  
 + 如果出现`nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use)`之类的报错
@@ -18,3 +19,5 @@
 	> `/usr/share/nginx/html` -> ***index.html***  
 
 ### 使用Nginx代理多个应用多个域名
+
+### 重启nginx失效，就一个个杀pid，杀完再重启就好了
