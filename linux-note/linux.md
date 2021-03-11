@@ -19,8 +19,6 @@
 	> [Linux下的vim常用操作详见](https://www.cnblogs.com/bjphp/p/8468330.html "Linux下的vim常用操作")
 8. 设置SSH免密登录，不会弄，后面有空再弄吧
 
-### Linux 下安装jdk和tomcat
-+ 下载linux版本的jdk和tomcat
-+ 其余待操作完之后参考收藏夹详细记录一下“
-
+### Linux 环境下配置jdk&tomcat并配合nginx部署
+参考收藏夹里的一系列文件夹写一个指南出来  
 PS: 有些文件windows里面修改完之后还是需要去linux中去掉空格，因为回车的占位符不同会报错`bash: $'\r': command not found`
