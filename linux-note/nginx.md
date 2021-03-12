@@ -33,3 +33,7 @@
 ### Nginx部署SSL证书
 + 下载nginx可用的ssl证书文件，再把这两个文件放到我们的服务器中，推荐放到/etc/ssl/目录下
 + 在`nginx.conf`文件中配置443端口的监听，写入ssl相关配置接口，参考`nginx-hello -> nginx.conf`
++ 强制使用https访问 `rewrite ^(.*)$  https://$host$1 permanent;`
+
+### Nginx部署多个SSL证书
++ 只需要上传新的证书，并监听新的`server_name`即可
