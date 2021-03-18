@@ -1,3 +1,3 @@
 # fx67llLinux
 
-learn linux
+learn Linux
