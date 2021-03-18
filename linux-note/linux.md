@@ -69,3 +69,12 @@ PS: 有些文件windows里面修改完之后还是需要去linux中去掉空格�
 + [参考资料四](https://zhidao.baidu.com/question/1306779967502674339.html "参考资料四")
 + [参考资料五](https://blog.csdn.net/qq_26922757/article/details/82910376 "参考资料五")
 + [参考资料六](https://blog.csdn.net/simon_1/article/details/18449921 "参考资料六")
+
+### Linux 环境下安装MongoDB
++ MD 写配置文件的时候不要照着教程的目录写，要写完整地址
++ 关闭 pkill mongod
++ 开启 ./mongod -f mongodb.conf （需要在bin目录下执行）
++ ***待参照收藏的文档整理记录整个流程以便以后回顾***
+
+### Linux 环境下部署基于Express的Nodejs项目
++ ***待参照收藏的文档整理记录整个流程以便以后回顾***
