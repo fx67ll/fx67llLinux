@@ -4,6 +4,7 @@ learn Linux
 ## 0.1.2.20210701
 * 完成记录***jenkins 结合 github 实现自动化构建***  
 * 修复`nginx 403 forbidden`的错误  
+* 添加自动化构建的`shell`本地备份  
 
 ## 0.1.1.20210630
 * 完成`Jenkins.war`的部署，[访问地址](http://jenkins.fx67ll.com)
