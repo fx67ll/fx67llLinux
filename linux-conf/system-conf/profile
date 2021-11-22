@@ -75,8 +75,12 @@ done
 unset i
 unset -f pathmunge
 
-export JAVA_HOME=/usr/soft/install/jdk1.8.0_144
-export PATH=$PATH:$JAVA_HOME/bin
+# export JAVA_HOME=/usr/soft/install/jdk1.8.0_144
+# export PATH=$PATH:$JAVA_HOME/bin
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-11.0.13.0.8-1.el7_9.x86_64
+export JRE_HOME=$JAVA_HOME/
+export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib:$CLASSPATH
+export PATH=$JAVA_HOME/bin:$JRE_HOME/bin:$PATH
 export CATALINA_HOME=/usr/soft/install/apache-tomcat-9.0.7
 export CATALINA_BASE=/usr/soft/install/apache-tomcat-9.0.7
 export PATH=$PATH:/usr/soft/install/mongodb-linux-x86_64-rhel70-4.4.4/bin
