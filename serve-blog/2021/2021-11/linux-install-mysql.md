@@ -12,9 +12,9 @@ CentOS7 + MySQL5.7
 1. 利用 xFtp 上传 `mysql.gz` 包至安装目录下，我的目录是 `/usr/soft/sort`
 2. 解压安装包至指定目录下，我的是同目录下的install文件夹
 	> `tar -zxvf /usr/soft/sort/mysql-5.7.26-linux-glibc2.12-x86_64.tar.gz -C /usr/soft/install/`
-3. 创建用户  
+3. 创建组  
 	> `groupadd mysql`  
-4. 创建组  
+4. 创建用户  
 	> `useradd -r -g mysql mysql`  
 5. 将安装目录所有者及所属组改为mysql
 	> `chown -R mysql.mysql /usr/soft/install/mysql-5.7.26-linux-glibc2.12-x86_64`  
