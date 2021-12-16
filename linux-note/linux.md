@@ -20,12 +20,12 @@
 8. 设置SSH免密登录，不会弄，后面有空再弄吧
 
 
-### Linux 环境下配置jdk&tomcat并配合nginx部署
+### Linux 环境下配置 JDK & Tomcat 并配合 Nginx 部署
 参考收藏夹里的一系列文件夹写一个指南出来  
 PS: 有些文件windows里面修改完之后还是需要去linux中去掉空格，因为回车的占位符不同会报错`bash: $'\r': command not found`
 
 
-### Linux 环境下安装jdk 
+### Linux 环境下安装 JDK 
 1. 利用 xFtp 上传 `jdk.gz` 包至安装目录下，我的目录是 `/usr/soft/sort`
 2. 解压安装包至指定目录下，我的是同目录下的install文件夹
 	> `tar -zxvf /usr/soft/sort/jdk-8u144-linux-x64.tar.gz -C /usr/soft/install/`
@@ -43,7 +43,7 @@ PS: 有些文件windows里面修改完之后还是需要去linux中去掉空格�
 + [参考资料二](https://blog.csdn.net/weixin_44538107/article/details/88683530 "参考资料二")
 
 
-### Linux 环境下安装tomcat
+### Linux 环境下安装 Tomcat
 1. 利用 xFtp 上传 `tomcat.gz` 包至安装目录下，我的目录是 `/usr/soft/sort`
 2. 解压安装包至指定目录下，我的是同目录下的install文件夹
 	> `tar -zxvf /usr/soft/sort/apache-tomcat-9.0.7.tar.gz -C /usr/soft/install/`
@@ -73,7 +73,7 @@ PS: 有些文件windows里面修改完之后还是需要去linux中去掉空格�
 + [参考资料六](https://blog.csdn.net/simon_1/article/details/18449921 "参考资料六")
 
 
-### Linux 环境下安装MongoDB
+### Linux 环境下安装 MongoDB
 1. 利用 xFtp 上传 `mongodb.gz` 包至安装目录下，我的目录是 `/usr/soft/sort`
 2. 解压安装包至指定目录下，我的是同目录下的install文件夹
 	> `tar -zxvf /usr/soft/sort/mongodb-linux-x86_64-rhel70-4.4.4.tgz -C /usr/soft/install/`
@@ -118,7 +118,7 @@ PS: 有些文件windows里面修改完之后还是需要去linux中去掉空格�
 + [参考资料四](https://www.imooc.com/article/78846 "参考资料四")
 
 
-### Linux 环境下安装Nodejs
+### Linux 环境下安装 Nodejs
 1. 利用 xFtp 上传 `node.tar.xz` 包至安装目录下，我的目录是 `/usr/soft/sort`
 	> 下载安装包时候一定要注意下***linux使用的tar.xz文件***，不要下***source源码文件***  
 	> 我之前弄错了疑惑了很久为什么解压之后没有bin目录  
@@ -137,7 +137,7 @@ PS: 有些文件windows里面修改完之后还是需要去linux中去掉空格�
 6. 输入 `node -v` 和 `npm -v` 测试是否可以正常显示版本
 
 
-### Linux 环境下部署基于Express的Nodejs项目
+### Linux 环境下部署基于 Express 的 Nodejs 项目
 1. 全局安装pm2进程管理工具
 	> `npm install pm2 -g`
 	> 常用命令如下  
@@ -152,7 +152,7 @@ PS: 有些文件windows里面修改完之后还是需要去linux中去掉空格�
 4. 浏览器地址输入 `http://211.149.128.130:3000` 看到首页即可  
 
 
-### Linux 环境下安装MySQL
+### Linux 环境下安装 MySQL
 1. 利用 xFtp 上传 `mysql.gz` 包至安装目录下，我的目录是 `/usr/soft/sort`
 2. 解压安装包至指定目录下，我的是同目录下的install文件夹
 	> `tar -zxvf /usr/soft/sort/mysql-5.7.26-linux-glibc2.12-x86_64.tar.gz -C /usr/soft/install/`
@@ -242,4 +242,19 @@ PS: 有些文件windows里面修改完之后还是需要去linux中去掉空格�
 ### 常用命令记录（待整理补充）  
 1. `top` 查看所有进程
 2. `kill -9 ID(你需要杀死的进程ID)` 杀死执行进程  
-3. `yum(Yellow dog Updater)` 命令的全程是是一个在 Fedora 和 RedHat 以及 SUSE 中的 Shell 前端软件包管理器    
+3. `yum(Yellow dog Updater)` 命令的全程是是一个在 Fedora 和 RedHat 以及 SUSE 中的 Shell 前端软件包管理器    、
+
+
+### Linux 环境下安装 Redis
+1. 利用 xFtp 上传 `redis.gz` 包至安装目录下，我的目录是 `/usr/soft/sort`  
+2. 解压安装包至指定目录下，我的是同目录下的install文件夹
+	> `tar -zxvf /usr/soft/sort/redis-6.2.6.tar.gz -C /usr/soft/install/`
+
+*下面我先简易写一下后续再整理丰富*
++ CentOS7默认使用4.8的gcc，需要升级gcc至5.3以上版本  
++ 升级之后使用`make`命令编译，这里就是用到gcc这个编译工具  
++ 配置安装目录下的src目录下的`redis-server`的环境变量，然后可以直接在系统中调用`redis-server`命令  
++ 修改`redis-conf`中的配置，需要注意的是，默认配置贼他妈长，请下载到本地修改，完事之后使用正则去除`^M`的符号  
++ 测试能否启动`redis-server redis-conf`，然后一堆命令，查看进程命令，连接登录redis命令，发现6379端口的进程即可  
++ 设置redis开机自启动，输入命令添加新的配置文件，验证新配置，查看服务状态
++ 还需要修改的是，关闭redis开机自启动服务的命令怎么修改  
