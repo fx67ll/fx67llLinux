@@ -39,7 +39,7 @@ CentOS7 + MySQL5.7
 	> `socket=/tmp/mysql.sock`（这行很重要，不然后续socket连接会出问题）  
 	> `user=mysql`  
 	> `port=3306`  
-	> `innodb_file_ per_table=1`  
+	> `innodb_file_per_table=1`  
 	> `character-set-server=utf8`  
 11. 这里需要操作两个目录，用于配置文件中部分文件的运行，不然直接启动会报错，建议先完成错误解决方案中的代码  
 	+ 第一个错误`mysqld_safe error: log-error set to /var/log/mariadb/mariadb.log`  
@@ -69,8 +69,8 @@ CentOS7 + MySQL5.7
 	+ 输入密码，可以直接去前面保存的初始密码复制过来  
 17. 修改初始密码
 	+ `use mysql;`（注意mysql语句使用英文`;`结束！！！）  
-	+ `mysql> update user set authentication_string=passworD("你的新密码") where user='root';`（mysql5.7及以上版本需要使用`authentication_string`字段来修改密码，有些博文并未提及，需要注意！！！）  
-	+ 这个也可修改密码，效果同上 `set password=password("你的新秘密");`  
+	+ `mysql> update user set authentication_string=password('你的新密码') where user='root';`（mysql5.7及以上版本需要使用`authentication_string`字段来修改密码，有些博文并未提及，需要注意！！！）  
+	+ 这个也可修改密码，效果同上 `set password=password('你的新秘密');`  
 	+ 重新加载权限表 `flush privileges;`  
 	+ 退出mysql `exit;`  
 
