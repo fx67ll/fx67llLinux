@@ -1,5 +1,20 @@
 # Tomcat 学习笔记
 
+### Liunx 下安装 Tomcat
+1. `tar -zxvf /usr/soft/sort/apache-tomcat-9.0.7.tar.gz -C /usr/soft/install`
+2. 复制文件
+3. 修复文件中的`^M`
+	+ [Linux下删除^M文件的方法](https://www.cnblogs.com/rsapaper/p/15697099.html)  
+	+ [安装 dos2unix](https://blog.csdn.net/qq_36389107/article/details/84500781)  
+	+ `cat -A /usr/soft/install/apache-tomcat-9.0.7/conf/server.xml`  
+	+ `dos2unix /usr/soft/install/apache-tomcat-9.0.7/conf/server.xml`  
+	+ ------------------------------------------------------  
+	+ `cat -A /usr/soft/install/apache-tomcat-9.0.7/bin/catalina.sh`  
+	+ `dos2unix /usr/soft/install/apache-tomcat-9.0.7/bin/catalina.sh`  
+	+ ------------------------------------------------------  
+	+ `cat -A /usr/soft/install/apache-tomcat-9.0.7/bin/setclasspath.sh`  
+	+ `dos2unix /usr/soft/install/apache-tomcat-9.0.7/bin/setclasspath.sh`  
+
 ### Linux 中修改Tomcat使用的jdk版本
 1. 由于部署Halo使用了`openjdk11`，但是我的tomcat之前用的是`jdk1.8`，版本升级的后果就是运行的时候报一点小bug  
 2. 所以就想着把tomcat使用的jdk版本调回原来的，找了很多资料之后，决定在tomcat的运行文件中覆盖使用的jdk版本路径  
