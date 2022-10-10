@@ -20,7 +20,7 @@ CentOS7 + MySQL8.0
 1. 解压xz文件为tar文件，注意命令无过程显示需要等待窗口跳至下一行  
 	+ `xz -d /usr/soft/sort/mysql-8.0.29-linux-glibc2.12-x86_64.tar.xz -C /usr/soft/sort/`  
 	+ `tar -xvf /usr/soft/sort/mysql-8.0.29-linux-glibc2.12-x86_64.tar -C /usr/soft/install/`  
-2. 修改权限 `chown -R mysql.mysql /usr/soft/install/mysql-8.0.29-linux-glibc2.12-x86_64`
+2. 赋予权限 `chown -R mysql.mysql /usr/soft/install/mysql-8.0.29-linux-glibc2.12-x86_64`
 3. 修改配置文件 `vi /usr/soft/install/mysql-8.0.29-linux-glibc2.12-x86_64/my.cnf`
 	```
 	[client]
@@ -40,7 +40,6 @@ CentOS7 + MySQL8.0
 	port=3307
 	innodb_file_per_table=1
 	character-set-server=utf8
-	allowPublicKeyRetrieval=true
 	# mysql57 不要这个
 	mysqlx_port=33070
 	socket = /tmp/mysql80.sock
@@ -54,6 +53,7 @@ CentOS7 + MySQL8.0
 	pid-file=/usr/soft/install/mysql-8.0.29-linux-glibc2.12-x86_64/data/mysqld.pid
 	tmpdir=/tmp/mysql80
 	```
+4. 赋予配置文件权限 `chmod 755 /usr/soft/install/mysql-8.0.29-linux-glibc2.12-x86_64/my.cnf`
 5. 修改连接服务文件 `vi /usr/soft/install/mysql-8.0.29-linux-glibc2.12-x86_64/support-files/mysql.server`
 	```
 	# 这两项在开头比较好找
@@ -71,9 +71,9 @@ CentOS7 + MySQL8.0
 	conf=/usr/soft/install/mysql-8.0.29-linux-glibc2.12-x86_64/my.cnf
 	```
 6. 复制注册连接服务文件  `cp -i /usr/soft/install/mysql-8.0.29-linux-glibc2.12-x86_64/support-files/mysql.server /etc/init.d/mysql80`
-7. `/usr/soft/install/mysql-8.0.29-linux-glibc2.12-x86_64/bin/mysqld --defaults-file=/usr/soft/install/mysql-8.0.29-linux-glibc2.12-x86_64/my.cnf --user=mysql  --initialize`
+7. 初始化mysql80 `/usr/soft/install/mysql-8.0.29-linux-glibc2.12-x86_64/bin/mysqld --defaults-file=/usr/soft/install/mysql-8.0.29-linux-glibc2.12-x86_64/my.cnf --user=mysql  --initialize`
 	+ root@localhost: 初始密码  
-8. 记得开放防火墙的3307端口  
+8. 启动mysql80服务 `service mysql80 start`，然后要记得开放防火墙的3307端口才能使用外部连接  
 9. 登录 `/usr/soft/install/mysql-8.0.29-linux-glibc2.12-x86_64/bin/mysql --socket=/tmp/mysql80.sock -u root -p'初始密码'`
 10. 重置密码，登录后依次执行命令
 	+ `flush privileges;`  
@@ -93,6 +93,14 @@ CentOS7 + MySQL8.0
 2. `vim iptables`使用`vim编辑器`修改`iptables`文件，按下`i`进入编辑模式  
 3. 在初始端口那行下面添加`-A INPUT -p tcp -m state --state NEW -m tcp --dport 3307 -j ACCEPT`，开放3307端口  
 4. `service iptables restart`重启防火墙即可  
+
+#### 如何mysql80服务启动失败
+可以参考一下步骤重新初始化数据库，亲测有效
+1. 删除data文件夹 `rm -rf /usr/soft/install/mysql-8.0.29-linux-glibc2.12-x86_64/data`  
+2. 新建data目录 `mkdir /usr/soft/install/mysql-8.0.29-linux-glibc2.12-x86_64/data`  
+3. 赋予权限 `chown -R mysql.mysql /usr/soft/install/mysql-8.0.29-linux-glibc2.12-x86_64`  
+4. 重新初始化 `/usr/soft/install/mysql-8.0.29-linux-glibc2.12-x86_64/bin/mysqld --defaults-file=/usr/soft/install/mysql-8.0.29-linux-glibc2.12-x86_64/my.cnf --user=mysql  --initialize`
+5. 测试启动服务 `service mysql80 start`，成功即可
 
 #### 参考文档
 1. [linux 下同时安装 mysql5.7 和 mysql8.0](https://blog.csdn.net/qq_43800252/article/details/113817371)  
