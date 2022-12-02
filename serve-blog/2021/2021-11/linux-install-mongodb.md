@@ -40,7 +40,7 @@ CentOS7 + MongoDB4.4
 	> 问号后面内容后期了解清楚，之前不加一直无法连接上  
 	> 注意：注释符号 `#` 和数据之间必须是一个空格  
 8. 测试运行和关闭数据库
-	> 在主目录下进入bin目录 `cd /bin`  
+	> 在主目录下进入bin目录 `cd /bin` 或 `cd /usr/soft/install/mongodb-linux-x86_64-rhel70-4.4.4/bin`  
 	> 启动 `./mongod -f mongodb.conf`  
 	> 关闭 `pkill mongod`（教程介绍了三种方法，目前我只有这一种命令成功了）  
 	> 检查端口是否已经被占用 `netstat -nltp|grep 27017` 或者 `top`  
