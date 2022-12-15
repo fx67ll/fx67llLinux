@@ -43,7 +43,7 @@ CentOS7 + MongoDB4.4
 	> 在主目录下进入bin目录 `cd /bin` 或 `cd /usr/soft/install/mongodb-linux-x86_64-rhel70-4.4.4/bin`  
 	> 启动 `./mongod -f mongodb.conf`  
 	> 关闭 `pkill mongod`（教程介绍了三种方法，目前我只有这一种命令成功了）  
-	> 检查端口是否已经被占用 `netstat -nltp|grep 27017` 或者 `top`  
+	> 通过检查端口是否已经被占用检查MongoDB是否运行正常 `netstat -nltp|grep 27017` 或者 `top` 或者 `netstat -lanp | grep "27017"`  
 9. 相关错误提示
 	> `child process failed,existed with error number 1` 之类的错误是配置文件写错，之前就是相对地址而不是全地址导致一直报这个错没有成功运行  
 	> `Mongodb enable authentication` 开启了权限或者是创建了账户密码，就需要使用用户名密码连接登录，裸连会直接报这个没有权限的错误  
