@@ -5,7 +5,9 @@
 2. 重启 Tomcat 服务  
 	+ `cd /usr/soft/install/apache-tomcat-9.0.7/bin`  
 	+ `./startup.sh`  
-3. 检查 MySQL 服务  
+3. 检查 MySQL 服务，`5.7`和`8.0`两个版本  
+	+ 5.7 - service mysql start？（没验证过，下次验证）
+	+ 8.0 - service mysql80 start
 4. 检查 MongoDB 服务  
 	+ `cd /usr/soft/install/mongodb-linux-x86_64-rhel70-4.4.4/bin`  
 	+ `./mongod -f mongodb.conf`  
