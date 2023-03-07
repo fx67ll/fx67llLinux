@@ -14,6 +14,9 @@
 5. 重启 Node 服务  
 	+ `cd /usr/node/JDSMS`  
 	+ `pm2 start app.js --name="fx67llNode"`  
+6. 重启防火墙
+	+ `service iptables start`  
+	+ 检查防火墙状态 `service iptables status`  
 
 **PS: Node项目一直没有启动起来，目前来看是因为MongoDB数据库已启动就炸了，下次再处理，这次没有记录完**
 
