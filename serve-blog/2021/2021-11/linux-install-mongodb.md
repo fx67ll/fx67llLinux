@@ -23,14 +23,14 @@ CentOS7 + MongoDB4.4
 	> 之前都会用一个别名来拼接地址，其实直接写完整地址也可以，`$PATH` 应该是代指之前存有的 `PATH变量`  
 5. 输入 `source /etc/profile` ，无报错立即生效
 6. 创建数据存放文件夹和日志记录文件夹，为后面的配置文件使用
-	> 在主目录下创建 `/data/db` 来存放数据  
-	> 在主目录下创建 `logs` 来存放日志  
+	> 在主目录下创建 `mkdir data -> mkdir data/db` 来存放数据  
+	> 在主目录下创建 `mkdir logs` 来存放日志  
 7. 创建运行时使用的配置文件
 	> 在主目录下进入bin目录 `cd /bin`  
 	> 创建配置文件 `vim mongodb.conf`  
 	> 输入以下配置（一定要写完整地址，教程上面是相对地址，结果我启动的时候一直报配置错误）  
 	> `dbpath = /usr/soft/install/mongodb-linux-x86_64-rhel70-4.4.4/data/db  # 数据文件存放目录`  
-	> `logpath = /usr/soft/install/mongodb-linux-x86_64-rhel70-4.4.4/logs  # 日志文件存放目录`  
+	> `logpath = /usr/soft/install/mongodb-linux-x86_64-rhel70-4.4.4/logs/mongodb.logs  # 日志文件存放目录`  
 	> `port = 27017  # 端口`  
 	> `fork = true  # 以守护程序的方式启用，即在后台运行`  
 	> `# auth=true  # 需要认证，如果放开注释，就必须创建MongoDB的账号，使用账号与密码才可远程访问，第一次安装建议注释`  
@@ -48,10 +48,29 @@ CentOS7 + MongoDB4.4
 	> `child process failed,existed with error number 1` 之类的错误是配置文件写错，之前就是相对地址而不是全地址导致一直报这个错没有成功运行  
 	> `Mongodb enable authentication` 开启了权限或者是创建了账户密码，就需要使用用户名密码连接登录，裸连会直接报这个没有权限的错误  
 
+### 卸载MongoDB
+1. 停止服务  
+2. 删除安装目录文件夹 `/usr/soft/install/mongodb-linux-x86_64-rhel70-4.4.4`  
+
+### 创建管理员账号密码
+1. 在主目录下进入bin目录 `cd /bin` 或 `cd /usr/soft/install/mongodb-linux-x86_64-rhel70-4.4.4/bin`  
+2. 运行mongodb `mongo`  
+3. 查看数据库 `show dbs;`（注意可能不会显示任何数据库）  
+4. 使用admin数据库 `use admin;`  
+5. 创建超级管理员账号 `db.createUser({user:"输入你的用户名",pwd:"输入你的密码",roles:[{role:"root",db:"admin"}]});`  
+6. 验证账号 `db.auth("你的用户名", "你的密码")`(如果返回1，则表示成功)  
+7. [查看更多有关用户详情的问题](https://blog.csdn.net/weixin_44834554/article/details/126768329)  
+
+### MongoDB Compass 远程连接语法
+```
+mongodb://你的用户名:你的密码@211.149.128.130:27017?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false
+```
+
 
 [参考资料一 ———— Linux安装、运行MongoDB](https://blog.csdn.net/yzh_1346983557/article/details/81735755)  
 [参考资料二 ———— 在Linux服务器中配置mongodb环境的步骤](https://www.jb51.net/article/119514.htm)  
 [参考资料三 ———— ERROR: child process failed, exited with error number 1](https://blog.csdn.net/Dn1115680109/article/details/88754067)  
+[参考资料四 ———— 创建用户](https://blog.csdn.net/weixin_44834554/article/details/126768329)  
 
 
 我是 [fx67ll.com](https://fx67ll.com)，如果您发现本文有什么错误，欢迎在评论区讨论指正，感谢您的阅读！  
