@@ -5,8 +5,13 @@ learn Linux
 |  :----:  | :----:  |  :----:  | :----:  |
 | 练习配置记录  | 配置记录 | 个人学习笔记  | 学习公开博客 |
 
+## 0.1.6.20230317
+* 完善`nginx`配置，并完成***单ip多SSL证书部署***  
+* 配置了哪些页面可以访问[导航页](https://nav.fx67ll.com)  
+* ~~后期更新博文：Nginx相关（暂未发布）~~
+
 ## 0.1.5.20220430
-* 更新博文：详解在Linux中安装配置MySQL（已完成发布）
+* 更新博文：详解在Linux中同时安装配置并使用 MySQL5.7 和 MySQL8.0（已完成发布）  
 
 ## 0.1.4.20211122
 * 去除81端口的`nginx`代理配置，并完善其余端口的`error`页面配置  
@@ -25,7 +30,7 @@ learn Linux
 * 添加自动化构建的`shell`本地备份  
 
 ## 0.1.1.20210630
-* 完成`Jenkins.war`的部署，[访问地址](http://test.fx67ll.com/jenkins)
+* 完成`Jenkins.war`的部署，[访问地址](https://test.fx67ll.com/jenkins)
 
 ## 0.1.0.20210630
 * 由于之前都没有作出详细的记录，所以这里写的都是以往完成的内容  
@@ -35,4 +40,4 @@ learn Linux
 * 完成`Tomcat`&`JDK`相关环境配置，并记录安装过程  
 * 完成基于`Tomcat`&`JDK`的`Cesium`项目部署，[项目访问地址](http://zichengc.com)  
 * 完成`Nodejs`&`MongoDB`相关环境配置，并记录安装过程  
-* 完成基于`Nodejs`&`MongoDB`的`Express`项目部署，[项目访问地址](http://node.fx67ll.com)  
+* 完成基于`Nodejs`&`MongoDB`的`Express`项目部署，[项目访问地址](https://node.fx67ll.com)  
