@@ -5,6 +5,15 @@ learn Linux
 |  :----:  | :----:  |  :----:  | :----:  |
 | 练习配置记录  | 配置记录 | 个人学习笔记  | 学习公开博客 |
 
+## 0.1.7.20230630
+* 完成`three.js`项目示例网站的部署，[项目访问地址](https://three.fx67ll.com)  
+* 完成`uni-app`项目示例网站的部署，[项目访问地址](https://uni.fx67ll.com)  
+* 完成`vue-ui`doc网站的部署，[项目访问地址](https://vue-ui.fx67ll.com)  
+* 完成大数据以及地图示例网站的部署，[项目访问地址](https://map.fx67ll.com)  
+* 完成`node.js`后端服务站点的部署，[项目访问地址](http://express.fx67ll.com)  
+* 完成快递项目示例网站的部署，[项目访问地址](http://uni-app.fx67ll.com)  
+* 完成个人管理系统站点前端文件的部署，[项目访问地址](http://vip.fx67ll.com)  
+
 ## 0.1.6.20230317
 * 完善`nginx`配置，并完成***单ip多SSL证书部署***  
 * 配置了哪些页面可以访问[导航页](https://nav.fx67ll.com)  
