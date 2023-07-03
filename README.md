@@ -12,7 +12,7 @@ learn Linux
 * 完成大数据以及地图示例网站的部署，[项目访问地址](https://map.fx67ll.com)  
 * 完成`node.js`后端服务站点的部署，[项目访问地址](http://express.fx67ll.com)  
 * 完成快递项目示例网站的部署，[项目访问地址](http://uni-app.fx67ll.com)  
-* 完成个人管理系统站点前端文件的部署，[项目访问地址](http://vip.fx67ll.com)  
+* 完成个人管理系统站点前端文件的部署，[项目访问地址](https://vip.fx67ll.com)  
 
 ## 0.1.6.20230317
 * 完善`nginx`配置，并完成***单ip多SSL证书部署***  
