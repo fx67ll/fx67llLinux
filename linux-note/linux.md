@@ -253,12 +253,18 @@ PS: 有些文件windows里面修改完之后还是需要去linux中去掉空格�
 2. 解压安装包至指定目录下，我的是同目录下的install文件夹
 	> `tar -zxvf /usr/soft/sort/redis-6.2.6.tar.gz -C /usr/soft/install/`
 3. 下面我先简易写一下，后续再整理丰富
-+ CentOS7默认使用4.8的gcc，需要升级gcc至5.3以上版本  
-+ 升级之后使用`make`命令编译，这里就是用到gcc这个编译工具  
-+ 配置安装目录下的src目录下的`redis-server`的环境变量，然后可以直接在系统中调用`redis-server`命令  
-+ 修改`redis-conf`中的配置，需要注意的是，默认配置贼他妈长，请下载到本地修改，完事之后[去除`^M`的符号](https://blog.csdn.net/chencheng126/article/details/43951547)  
-+ 测试能否启动`redis-server redis-conf`，然后一堆命令，查看进程命令，连接登录redis命令，发现6379端口的进程即可  
-+ 设置redis开机自启动，输入命令添加新的配置文件，验证新配置，查看服务状态
-+ 还需要修改的是，关闭redis开机自启动服务的命令怎么修改  
-4. 由于是服务端高频应用，继续放到服务端服务器（阿里轻量云或其他后续迁移的机器）中使用，练习也使用服务端机器操作，西部数码中的服务停止
+	+ CentOS7默认使用4.8的gcc，需要升级gcc至5.3以上版本  
+	+ 升级之后使用`make`命令编译，这里就是用到gcc这个编译工具  
+	+ 配置安装目录下的src目录下的`redis-server`的环境变量，然后可以直接在系统中调用`redis-server`命令  
+	+ 修改`redis-conf`中的配置，需要注意的是，默认配置贼他妈长，请下载到本地修改，完事之后[去除`^M`的符号](https://blog.csdn.net/chencheng126/article/details/43951547)  
+	+ 测试能否启动`redis-server redis-conf`，然后一堆命令，查看进程命令，连接登录redis命令，发现6379端口的进程即可  
+	+ 如果需要使用密码登录，可以使用这个命令`redis-cli -h 127.0.0.1 -p 6379 -a (这里是配置文件里写的密码)`
+	+ 设置redis开机自启动，输入命令添加新的配置文件，验证新配置，查看服务状态
+	+ 关闭redis服务，可以使用密码连接到redis服务之后使用`shutdown`，显示*not connected*既为关闭成功  
+	+ 检查redis服务状态 `ps -ef | grep redis`  
+	+ 检查redis进程信息 `top -p (上一个命令查询到的 PID)`
+4. 由于是服务端高频应用，继续放到服务端服务器（阿里轻量云或其他后续迁移的机器）中使用，练习也使用服务端机器操作，西部数码中的服务停止  
+5. 参考资料记录  
+	+ [Redis 配置登录密码](https://www.cnblogs.com/ryanzheng/p/9501204.html)  
+	+ [Redis启动与关闭](https://blog.csdn.net/m0_58746619/article/details/125874797)  
 *————————————————————————————但是该教程记得先补充完整————————————————————————————————————————*

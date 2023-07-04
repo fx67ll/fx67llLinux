@@ -20,6 +20,7 @@
 6. 重启防火墙
 	+ `service iptables start`  
 	+ 检查防火墙状态 `service iptables status`  
+7. 注意！！！*redis服务已在前台应用集合服务器上关闭，所以不需要关注*
 
 
 ### 服务器重要文件目录  
