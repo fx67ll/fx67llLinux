@@ -4,23 +4,31 @@
 ### 逐一重启以下服务
 1. 重启 Nginx 服务  
 	+ `nginx`  
-2. 重启 Tomcat 服务  
+2. 重启 Tomcat 服务，主要为了跑`jenkins`  
 	+ `cd /usr/soft/install/apache-tomcat-9.0.7/bin`  
 	+ `./startup.sh`  
-3. 检查 MySQL 服务，`5.7`和`8.0`两个版本  
-	+ 5.7 - service mysql start？（没验证过，下次验证）
-	+ 8.0 - service mysql80 start
-4. 检查 MongoDB 服务  
+3. 检查 MongoDB 服务  
 	+ `cd /usr/soft/install/mongodb-linux-x86_64-rhel70-4.4.4/bin`  
 	+ `./mongod -f mongodb.conf`  
 	+ *炸了貌似只能重装，目前还不会运维MongoDB*
-5. 重启 Node 服务  
+4. 重启 Node 服务  
 	+ `cd /usr/node/JDSMS`  
 	+ `pm2 start app.js --name="fx67llNode"`  
-6. 重启防火墙
+5. 重启防火墙
 	+ `service iptables start`  
 	+ 检查防火墙状态 `service iptables status`  
-7. 注意！！！*redis服务已在前台应用集合服务器上关闭，所以不需要关注*
+6. 各类练习用的数据库服务，需要注意！！！*因为都已在前台应用集合服务器上关闭，所以暂时不需要关注开启*
+	+ MySQL-5.7 
+	+ `service mysql start/status/stop`  
+	+ MySQL-8.0 
+	+ `service mysql80 start/status/stop`  
+	+ Redis 服务搞起来相对于 MySQL 稍微复杂点  
+	+ Redis 开启
+	+ `cd /usr/soft/install/mongodb-linux-x86_64-rhel70-4.4.4/bin`  
+	+ `redis-server redis.conf`  
+	+ Redis 关闭
+	+ 使用root账户登录redis-cli `redis-cli -h 127.0.0.1 -p 6379 -a (这里是配置文件里写的密码)`  
+	+ `shutdown`，显示*not connected*即为关闭成功
 
 
 ### 服务器重要文件目录  
