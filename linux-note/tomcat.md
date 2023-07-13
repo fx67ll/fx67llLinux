@@ -1,9 +1,10 @@
 # Tomcat 学习笔记
 
-### Liunx 下安装 Tomcat
-1. `tar -zxvf /usr/soft/sort/apache-tomcat-9.0.7.tar.gz -C /usr/soft/install`
-2. 复制文件
-3. 修复文件中的`^M`
+### Liunx 下安装 Tomcat 遇到的问题
+1. 详细安装笔记在`linux.md`文件中  
+2. `tar -zxvf /usr/soft/sort/apache-tomcat-9.0.7.tar.gz -C /usr/soft/install`
+3. 复制文件
+4. 修复文件中的`^M`
 	+ [Linux下删除^M文件的方法](https://www.cnblogs.com/rsapaper/p/15697099.html)  
 	+ [安装 dos2unix](https://blog.csdn.net/qq_36389107/article/details/84500781)  
 	+ `cat -A /usr/soft/install/apache-tomcat-9.0.7/conf/server.xml`  
