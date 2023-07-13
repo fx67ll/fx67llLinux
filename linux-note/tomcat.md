@@ -2,9 +2,8 @@
 
 ### Liunx 下安装 Tomcat 遇到的问题
 1. 详细安装笔记在`linux.md`文件中  
-2. `tar -zxvf /usr/soft/sort/apache-tomcat-9.0.7.tar.gz -C /usr/soft/install`
-3. 复制文件
-4. 修复文件中的`^M`
+2. 复制文件命令 `tar -zxvf /usr/soft/sort/apache-tomcat-9.0.7.tar.gz -C /usr/soft/install`
+3. 修复文件中的`^M`
 	+ [Linux下删除^M文件的方法](https://www.cnblogs.com/rsapaper/p/15697099.html)  
 	+ [安装 dos2unix](https://blog.csdn.net/qq_36389107/article/details/84500781)  
 	+ `cat -A /usr/soft/install/apache-tomcat-9.0.7/conf/server.xml`  
@@ -16,8 +15,8 @@
 	+ `cat -A /usr/soft/install/apache-tomcat-9.0.7/bin/setclasspath.sh`  
 	+ `dos2unix /usr/soft/install/apache-tomcat-9.0.7/bin/setclasspath.sh`  
 
-### Linux 中修改Tomcat使用的jdk版本
-1. 由于部署Halo使用了`openjdk11`，但是我的tomcat之前用的是`jdk1.8`，版本升级的后果就是运行的时候报一点小bug  
+### Linux 中修改 Tomcat 使用的jdk版本
+1. 由于部署个人项目使用了`openjdk11`，但是我之前安装的是`jdk1.8`，jdk版本升级的后果就是，tomcat运行的时候报一点小bug（因为之前安装tomcat默认使用了系统的jdk版本）  
 2. 所以就想着把tomcat使用的jdk版本调回原来的，找了很多资料之后，决定在tomcat的运行文件中覆盖使用的jdk版本路径  
 3. 需要注意的是，`openjdk11`没有jre目录，所以一定要注意将`JRE_HOME=$JAVA_HOME/jre`中的jre删掉  
 4. 检查tomcat安装目录下`/bin/catalina.sh`和`/bin/setclasspath.sh`文件  
