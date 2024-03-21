@@ -21,7 +21,6 @@
 	+ 使用 `BGSAVE` 命令持久化旧服务器的数据，生成文件 `dump.rdb`，停止新服务器redis服务，复制到新服务器，重启服务即可迁移redis数据  
 5. 使用宝塔安装 `jdk1.8` & `tomcat9`，上传服务包至 `/home/ruoyi`，使用宝塔界面配置服务并启动即可  
 
-
 #### Redis数据迁移流程详细记录
 ```
 # 在原服务器上创建数据快照（同步操作，可能会阻塞）
@@ -36,4 +35,42 @@ scp /path/to/redis/dump.rdb user@newserver:/path/to/redis/
  
 # 在新服务器上启动 Redis 服务
 redis-server --port 6379 --bind 0.0.0.0 --dir /path/to/redis/ --dbfilename dump.rdb
+```
+
+
+### 宝塔面板绑定域名以及ssl证书的流程
+1. 先关闭面板本身的 *ssl开关* ，可视化界面关闭不一定成功，在 *ssh面板* 输入 `bt` 命令关闭即可  
+2. 可以绑定域名访问，也可以不绑定域名访问，绑定后仍然需要使用 `域名+端口号` 的方式访问  
+3. 监听 `80端口`，使用 *nginx代理* 原来宝塔的 `http地址` 就可以完成域名绑定
+4. 监听 `443端口` 就可以使用 `https地址` 访问，*ssl证书* 申请流程不在此记录了  
+
+#### 宝塔Nginx配置记录
+```
+server {
+	listen  80;
+	server_name ez13.top;
+	location / {
+		proxy_pass http://ez13.top:1023;
+		# proxy_pass http://123.60.188.134:1023;
+	}
+}
+
+server
+{
+	listen 443 ssl;
+	server_name ez13.top;
+	
+	ssl_certificate               /etc/ssl/ez13.top/ez13.top.crt;
+	ssl_certificate_key           /etc/ssl/ez13.top/ez13.top.key;
+	ssl_protocols                 TLSv1.1 TLSv1.2 TLSv1.3;
+	ssl_ciphers                   ECDHE-RSA-AES128-GCM-SHA256:HIGH:!aNULL:!MD5:!RC4:!DHE;
+	ssl_prefer_server_ciphers     on;
+	ssl_session_cache             shared:SSL:1m;
+	ssl_session_timeout           10m;
+	
+	location / {
+		proxy_pass http://ez13.top:1023;
+		# proxy_pass http://123.60.188.134:1023;
+	}
+}
 ```
