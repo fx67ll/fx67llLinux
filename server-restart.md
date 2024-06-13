@@ -6,20 +6,16 @@
 2. 重启 Tomcat 服务，主要为了跑`jenkins`  
 	+ `cd /usr/soft/install/apache-tomcat-9.0.7/bin`  
 	+ `./startup.sh`  
-3. 检查 MongoDB 服务  
-	+ `cd /usr/soft/install/mongodb-linux-x86_64-rhel70-4.4.4/bin`  
-	+ `./mongod -f mongodb.conf`  
-	+ *炸了貌似只能重装，目前还不会运维MongoDB*
-4. 重启 Node 服务  
+3. 重启 Node 服务  
 	+ `cd /usr/node/JDSMS`  
 	+ `pm2 start app.js --name="fx67llNode"`  
-5. 重启防火墙
+4. 重启防火墙
 	+ `service iptables start`  
 	+ 检查防火墙状态 `service iptables status`  
 
 
 ### 常态化关闭的服务
-*因为都已在前台应用集合服务器上关闭，所以暂时不需要关注开启*
+*这些服务都已在前台应用集合服务器上关闭，所以暂时不需要关注开启*
 1. MySQL-5.7 
 	> 查询状态 `service mysql start/status/status`  
 	> 开启服务 `service mysql start/status/start`  
@@ -41,7 +37,12 @@
 	> 使用root账户登录redis-cli `redis-cli -h 127.0.0.1 -p 6379 -a (这里是配置文件里写的密码)`  
 	> `shutdown`，显示*not connected*即为关闭成功
 	> **端口 6379**  
-	> *-A INPUT -p tcp -m state --state NEW -m tcp --dport 6379 -j ACCEPT*
+	> *-A INPUT -p tcp -m state --state NEW -m tcp --dport 6379 -j ACCEPT*  
+4. 检查 MongoDB 服务  
+	+ `cd /usr/soft/install/mongodb-linux-x86_64-rhel70-4.4.4/bin`  
+	+ `./mongod -f mongodb.conf`  
+	+ *炸了貌似只能重装，目前还不会运维MongoDB*  
+
 #### 防火墙端口修改流程
 1. `cd /etc/sysconfig`进入该目录，检查是否存储了`iptables`文件  
 2. `vim iptables`使用`vim编辑器`修改`iptables`文件，按下`i`进入编辑模式  
