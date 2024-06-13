@@ -1,5 +1,8 @@
 # FODCF的shell记录
 
+```shell
+cp /root/.jenkins/workspace/neverUploadToGithub.js /root/.jenkins/workspace/FODCF/  
+ls /root/.jenkins/workspace/FODCF/  
 npm install
 npm run build
 cd dist
@@ -14,7 +17,7 @@ rm -R dist
 cd /usr/share/nginx/html-90
 tar -zxvf dist.tar.gz -C ./
 rm -R dist.tar.gz
-
+```
 
 ### `FODCF`在`github`中用的`Personal access tokens`是`jenkins-token`  
 ### `ssh钥匙`统一用`fx67ll ifnxs`  

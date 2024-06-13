@@ -1,5 +1,6 @@
 # EMMMS的shell记录
 
+```shell
 pwd  
 node -v  
 npm -v  
@@ -17,6 +18,7 @@ rm -R dist
 cd /usr/share/nginx/html-82  
 tar -zxvf dist.tar.gz -C ./  
 rm -R dist.tar.gz  
+```
 
 
 ### `EMMMS`在`github`中用的`Personal access tokens`是`jenkins-token`  

@@ -1,5 +1,6 @@
 # MCDPC的shell记录
 
+```shell
 npm install  
 npm run build  
 cd dist  
@@ -14,6 +15,7 @@ rm -R dist
 cd /usr/share/nginx/html-85  
 tar -zxvf dist.tar.gz -C ./  
 rm -R dist.tar.gz  
+```
 
 
 ### `MCDPC`在`github`中用的`Personal access tokens`是`jenkins-token`  

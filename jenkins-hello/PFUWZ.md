@@ -1,5 +1,6 @@
 # PFUWZ的shell记录
 
+```shell
 pwd
 java -version
 cd unpackage/dist/build/h5
@@ -19,6 +20,7 @@ rm -R ./dist.tar.gz
 cd /usr/share/nginx/html-87
 tar -zxvf dist.tar.gz -C ./
 rm -R dist.tar.gz
+```
 
 
 ### `PFUWZ`在`github`中用的`Personal access tokens`是`jenkins-token`  

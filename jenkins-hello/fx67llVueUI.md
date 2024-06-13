@@ -1,5 +1,6 @@
 # fx67llVueUI的shell记录
 
+```shell
 pwd
 java -version
 npm install
@@ -20,7 +21,8 @@ scp /root/.jenkins/workspace/fx67llVueUI/.vuepress/dist/dist.tar.gz /usr/share/n
 rm -R ./dist.tar.gz
 cd /usr/share/nginx/html-89
 tar -zxvf dist.tar.gz -C ./
-rm -R dist.tar.gz
+rm -R dist.tar.gz  
+```
 
 
 ### `fx67llVueUI`在`github`中用的`Personal access tokens`是`jenkins-token-test`  
