@@ -1,5 +1,6 @@
 # NPPBE的shell记录
 
+```shell
 ls -a
 tar -zcvf dist.tar.gz *
 cd /usr/node/NPPBE
@@ -24,7 +25,7 @@ echo /usr/node/NPPBE filelist after 'rm -r/-f'
 ls -a
 echo ---------------------------------------------------------
 cd ../
-scp /usr/node/.env /usr/node/NPPBE
+scp /root/.jenkins/workspace/.env /usr/node/NPPBE
 cd ./NPPBE
 echo ---------------------------------------------------------
 echo /usr/node/NPPBE filelist last
@@ -34,6 +35,7 @@ npm install
 cd bin
 pm2 list
 pm2 start www --name="NPPBE"
+```
 
 
 ### `NPPBE`在`github`中用的`Personal access tokens`是`jenkins-token`  
