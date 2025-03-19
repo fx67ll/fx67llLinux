@@ -20,6 +20,7 @@
 	+ 分别使用 `redis-cli` 命令和外部工具 `RedisDesktopManagement` 连接验证一下  
 	+ 使用 `BGSAVE` 命令持久化旧服务器的数据，生成文件 `dump.rdb`，停止新服务器redis服务，复制到新服务器，重启服务即可迁移redis数据  
 5. 使用宝塔安装 `jdk1.8` & `tomcat9`，上传服务包至 `/home/ruoyi`，使用宝塔界面配置服务并启动即可  
+	+ 基础启动命令 `/usr/local/btjdk/jdk8/bin/java  -jar -Xmx1024M -Xms256M  /home/ruoyi/ruoyi-admin.jar --server.port=9897`
 6. 修改nginx配置文件中，fx67ll后台管理系统的api映射地址，直接搜关键字`api`即可查询到，改为新服务器的ip地址  
 7. 安装mongodb服务，修改node应用的`.env`文件中，mongodb的远程连接地址，使用`pm2 restart <应用名称> --update-env`重启服务并更新后台环境   
 8. 其余配置参考老的宝塔，一步一步拷贝设置就行了
