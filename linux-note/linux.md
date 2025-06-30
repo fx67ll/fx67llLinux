@@ -51,8 +51,8 @@ PS: 有些文件windows里面修改完之后还是需要去linux中去掉空格�
 	> `vim /etc/profile`
 4. 在文件的最后一行添加如下内容
 	> 按 `i` 开始修改（注意 `s` 会删除当前选中字符）  
-	> `export CATALINA_HOME=/usr/local/tomcat/apache-tomcat-9.0.7`  
-	> `export CATALINA_BASE=/usr/local/tomcat/apache-tomcat-9.0.7`  
+	> `export CATALINA_HOME=/usr/soft/install/apache-tomcat-9.0.7`  
+	> `export CATALINA_BASE=/usr/soft/install/apache-tomcat-9.0.7`  
 	> 按 `esc` 停止编辑，按 `:` 开始输入，输入 `wq` 保存并退出
 5. 输入 `source /etc/profile` ，无报错立即生效
 6. 在 `/usr/soft/install/apache-tomcat-9.0.7/conf` 目录下修改配置文件
