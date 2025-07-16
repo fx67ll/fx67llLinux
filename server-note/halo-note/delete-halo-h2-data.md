@@ -8,6 +8,8 @@ systemctl stop halo
 # 修改配置文件
 cd /home/halo/.halo
 vi application.yaml  
+或
+vi /home/halo/.halo/application.yaml  
 
 # 修改一下内容
 h2:
@@ -26,3 +28,5 @@ systemctl start halo
 ```SQL
 SELECT * FROM ATTACHMENTS WHERE ORDER BY ID DESC;
 ```
+
+*最后还是没有成功。。。待后续研究验证。。。*
