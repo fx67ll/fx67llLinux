@@ -112,8 +112,8 @@ server {
 		try_files  $uri $uri/ /index.html;
 	}
 	# 配置当报 404 错误访问的界面
-	error_page 404 /40x.html;
-	location = /40x.html {
+	error_page 404 /404.html;
+	location = /404.html {
 		root  /usr/nginx/html-404;
 	}
 	# 配置当报 50 开头错误访问的界面
@@ -126,14 +126,14 @@ server {
 3. 注意！！！`error_page`配置时`加=`和`不加=`的区别  
 ```
 # 这样可以访问错误页面时 http status 为 404 或 50x ，并且页面内容是 404.html/50x.html 的内容
-error_page 404 /40x.html
+error_page 404 /404.html
 error_page 500 502 503 504 /50x.html;
 ================================================
 # 这样配置访问错误页面时 http status 为 200 ，但页面内容是 404.html 的内容
-error_page 404 500 = /40x.html;
+error_page 404 500 = /404.html;
 ================================================ 
 # 这样配置访问错误页面时 http status 为 404 ，但页面内容是 404.html 的内容
-error_page 404 500 =404 /40x.html;
+error_page 404 500 =404 /404.html;
  ===============================================
 # 也可以把 404请求 直接跳转到 301 到某个域上
 error_page 404 =301 https://xxx.com/404;
