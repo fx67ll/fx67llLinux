@@ -1,36 +1,46 @@
-# fx67ll.xyz的shell记录
+# fx67ll.com的shell记录
 
-```shell-old
-pwd  
-java -version  
-cd fx67ll.xyz  
-if [ -f "./dist.tar.gz" ];then  
-  rm -R dist.tar.gz  
-else  
-  echo "文件不存在"  
-fi  
-tar -zcvf dist.tar.gz ./*  
-cd /usr/share/nginx/html  
-ls  
-rm -rf *  
-ls  
-cd /root/.jenkins/workspace/fx67ll.xyz/fx67ll.xyz  
-scp /root/.jenkins/workspace/fx67ll.xyz/fx67ll.xyz/dist.tar.gz /usr/share/nginx/html  
-rm -R ./dist.tar.gz  
-cd /usr/share/nginx/html  
-tar -zxvf dist.tar.gz -C ./  
-rm -R dist.tar.gz  
+#### v1
+```shell
+pwd
+java -version
+cd dist
+if [ -f "./dist.tar.gz" ];then
+  rm -R dist.tar.gz
+else
+  echo "文件不存在"
+fi
+tar -zcvf dist.tar.gz ./*
+cd /usr/share/nginx/html-1023
+ls
+rm -rf *
+ls
+cd /root/.jenkins/workspace/fx67ll.com/dist
+scp /root/.jenkins/workspace/fx67ll.com/dist/dist.tar.gz /usr/share/nginx/html-1023
+rm -R ./dist.tar.gz
+cd /usr/share/nginx/html-1023
+tar -zxvf dist.tar.gz -C ./
+rm -R dist.tar.gz
 ```
 
-```shell-new
+#### v2
+```shell
 #!/bin/bash
 
 # 记录执行日志
 echo "开始部署 - $(date)"
 
-# 显示当前路径和Java版本
+# 打印项目和端口
+PROJECT_NAME=fx67ll.com
+PROJECT_PORT=1997
+PROJECT_FILE_PATH=dist
+echo "本次编译项目名称：$PROJECT_NAME，项目编号：$PROJECT_PORT"
+
+# 显示当前路径和Java/Node版本
 pwd
 java -version
+node -v
+npm -v
 
 # 确定Nginx用户
 NGINX_USER=$(ps aux | grep nginx | grep -v grep | awk '{print $1}' | head -1)
@@ -45,7 +55,7 @@ fi
 echo "检测到Nginx用户: $NGINX_USER"
 
 # 进入项目目录
-cd fx67ll.xyz || { echo "无法进入项目目录"; exit 1; }
+cd $PROJECT_FILE_PATH || { echo "无法进入项目目录"; exit 1; }
 
 # 检查并删除已存在的tar文件
 if [ -f "./dist.tar.gz" ]; then
@@ -60,7 +70,7 @@ tar -zcvf dist.tar.gz ./* || { echo "创建tar包失败"; exit 1; }
 echo "成功创建tar包"
 
 # 切换到Nginx目录
-cd /usr/share/nginx/html-8070 || { echo "无法进入Nginx目录"; exit 1; }
+cd /usr/share/nginx/html-$PROJECT_PORT || { echo "无法进入Nginx目录"; exit 1; }
 
 # 备份当前内容
 if [ "$(ls -A)" ]; then
@@ -69,23 +79,23 @@ if [ "$(ls -A)" ]; then
 fi
 
 # 复制tar包到Nginx目录
-cd /root/.jenkins/workspace/fx67ll.xyz/fx67ll.xyz || { echo "无法进入工作目录"; exit 1; }
-scp /root/.jenkins/workspace/fx67ll.xyz/fx67ll.xyz/dist.tar.gz /usr/share/nginx/html-8070 || { echo "复制tar包失败"; exit 1; }
+cd /root/.jenkins/workspace/$PROJECT_NAME/$PROJECT_FILE_PATH || { echo "无法进入工作目录"; exit 1; }
+scp /root/.jenkins/workspace/$PROJECT_NAME/$PROJECT_FILE_PATH/dist.tar.gz /usr/share/nginx/html-$PROJECT_PORT || { echo "复制tar包失败"; exit 1; }
 rm -f ./dist.tar.gz
 echo "已复制tar包并删除源文件"
 
 # 解压tar包到Nginx目录
-cd /usr/share/nginx/html-8070 || { echo "无法进入Nginx目录"; exit 1; }
+cd /usr/share/nginx/html-$PROJECT_PORT || { echo "无法进入Nginx目录"; exit 1; }
 tar -zxvf dist.tar.gz -C ./ || { echo "解压tar包失败"; exit 1; }
 rm -f dist.tar.gz
 
 # 设置正确的文件权限 - 使用检测到的Nginx用户
-chown -R $NGINX_USER:$NGINX_USER /usr/share/nginx/html-8070 || { echo "设置文件所有者失败，尝试使用单用户"; chown -R $NGINX_USER /usr/share/nginx/html-8070 || { echo "仍然无法设置文件所有者，请检查用户权限"; exit 1; } }
-chmod -R 755 /usr/share/nginx/html-8070 || { echo "设置文件权限失败"; exit 1; }
+chown -R $NGINX_USER:$NGINX_USER /usr/share/nginx/html-$PROJECT_PORT || { echo "设置文件所有者失败，尝试使用单用户"; chown -R $NGINX_USER /usr/share/nginx/html-$PROJECT_PORT || { echo "仍然无法设置文件所有者，请检查用户权限"; exit 1; } }
+chmod -R 755 /usr/share/nginx/html-$PROJECT_PORT || { echo "设置文件权限失败"; exit 1; }
 echo "已设置正确的文件权限"
 
 # 检查index.html是否存在
-if [ -f "/usr/share/nginx/html-8070/index.html" ]; then
+if [ -f "/usr/share/nginx/html-$PROJECT_PORT/index.html" ]; then
   echo "部署成功: index.html文件存在"
 else
   echo "警告: index.html文件不存在，请检查项目结构"
@@ -102,6 +112,6 @@ echo "部署完成 - $(date)"
 ```
 
 
-### `fx67ll.xyz`在`github`中用的`Personal access tokens`是`jenkins-token-test`  
+### `fx67ll.com`在`github`中用的`Personal access tokens`是`jenkins-token-test`  
 ### `ssh钥匙`统一用`fx67ll ifnxs`  
 ### 记得在`github`项目中设置`Webhooks` -> `Payload URL`统一配置`http://test.fx67ll.com/jenkins/github-webhook/` -> `Content type`统一配置`application/json` -> 其余使用默认配置  

@@ -1,5 +1,6 @@
 # NPPBE的shell记录
 
+#### v1
 ```shell
 ls -a
 tar -zcvf dist.tar.gz *
@@ -35,6 +36,10 @@ npm install
 cd bin
 pm2 list
 pm2 start www --name="NPPBE"
+```
+
+#### v2
+```shell
 ```
 
 
