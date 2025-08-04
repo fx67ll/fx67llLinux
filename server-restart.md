@@ -1,6 +1,6 @@
 # 前端服务重启后，重点操作事项记录
 
-### 逐一重启以下服务
+## 逐一重启以下服务
 1. 重启 Nginx 服务  
 	+ `nginx`  
 2. 重启 Tomcat 服务，主要为了跑`jenkins`  
@@ -14,7 +14,7 @@
 	+ 检查防火墙状态 `service iptables status`  
 
 
-### 常态化关闭的服务
+## 常态化关闭的服务
 *这些服务都已在前台应用集合服务器上关闭，所以暂时不需要关注开启*
 1. MySQL-5.7 
 	> 查询状态 `service mysql start/status/status`  
@@ -43,7 +43,7 @@
 	+ `./mongod -f mongodb.conf`  
 	+ *炸了貌似只能重装，目前还不会运维MongoDB*  
 
-#### 防火墙端口修改流程
+## 防火墙端口修改流程
 1. `cd /etc/sysconfig`进入该目录，检查是否存储了`iptables`文件  
 2. `vim iptables`使用`vim编辑器`修改`iptables`文件，按下`i`进入编辑模式  
 3. 在初始端口那行下面添加`-A INPUT -p tcp -m state --state NEW -m tcp --dport xxx -j ACCEPT`，开放xxx端口  
