@@ -7,11 +7,12 @@
 	+ 8888 宝塔初始端口  
 	+ 3306 mysql初始端口  
 	+ 6379 redis初始端口  
-	+ 9897 ruoyi服务端口  
+	+ 9897 ruoyi服务端口（*超神服务9797*）  
 3. mysql服务迁移流程  
 	+ 宝塔下载安装mysql  
 	+ 修改账号密码
-	+ 分别使用 `mysql -u root -p` 命令和外部工具 `DBeaver` 连接验证一下  
+	+ 分别使用 `mysql -u root -p` 命令和外部工具 `DBeaver` 连接验证一下  、
+	+ `DBeaver`远程连接之前需要赋予外部连接权限，执行命令`GRANT ALL PRIVILEGES ON `数据库名`.* TO '用户名'@'远程IP' IDENTIFIED BY '密码' WITH GRANT OPTION;` + `FLUSH PRIVILEGES;`  
 	+ 使用宝塔备份数据的功能迁移mysql数据  
 4. redis服务迁移流程  
 	+ 宝塔下载安装redis  
@@ -21,7 +22,23 @@
 	+ 分别使用 `redis-cli` 命令和外部工具 `RedisDesktopManagement` 连接验证一下  
 	+ 使用 `BGSAVE` 命令持久化旧服务器的数据，生成文件 `dump.rdb`，停止新服务器redis服务，复制到新服务器，重启服务即可迁移redis数据  
 5. 使用宝塔安装 `jdk1.8` & `tomcat9`，上传服务包至 `/home/ruoyi`，使用宝塔界面配置服务并启动即可  
-	+ 基础启动命令 `/usr/local/btjdk/jdk8/bin/java  -jar -Xmx1024M -Xms256M  /home/ruoyi/ruoyi-admin.jar --server.port=9897`
+	+ 基础启动命令 `/usr/local/btjdk/jdk8/bin/java  -jar -Xmx1024M -Xms256M  /home/ruoyi/ruoyi-admin.jar --server.port=9897`（*超神服务9797*） 
+	+ 如果内存不够，超神减配启动命令如下
+	```bash
+	/usr/bin/java \
+	-Xms128M -Xmx512M \
+	-XX:MetaspaceSize=64M -XX:MaxMetaspaceSize=128M \
+	-XX:MaxDirectMemorySize=128M \
+	-XX:+UseG1GC -XX:MaxGCPauseMillis=200 \
+	-Dlogging.pattern.console="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n" \
+	-Dlogging.file.max-size=100MB -Dlogging.file.max-history=7 \
+	-jar /home/ruoyi-chaoshen/ruoyi-admin.jar \
+	--server.port=9797 \
+	--spring.boot.admin.enabled=false \
+	--management.endpoints.web.exposure.include= \
+	--spring.cache.type=none \
+	--ruoyi.log.desensitize=false
+	```
 6. 修改nginx配置文件中，fx67ll后台管理系统的api映射地址，直接搜关键字`api`即可查询到，改为新服务器的ip地址  
 7. 安装mongodb服务，修改node应用的`.env`文件中，mongodb的远程连接地址，使用`pm2 restart <应用名称> --update-env`重启服务并更新后台环境   
 8. 其余配置参考老的宝塔，一步一步拷贝设置就行了
