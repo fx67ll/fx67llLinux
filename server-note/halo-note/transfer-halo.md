@@ -20,16 +20,16 @@
 #### 先准备好 halo 运行用户
 ```
 # 创建一个名为 halo 的用户（名字可以随意）
-useradd -m halo  
+useradd -m halo-fx67ll  
 
 # 给予 sudo 权限
-usermod -aG sudo halo  
+usermod -aG sudo halo-fx67ll  
 
 # 为 halo 用户创建密码
-passwd halo  
+passwd halo-fx67ll  
 
 # 登录到 halo 账户
-su - halo  
+su - halo-fx67ll  
 ```
 
 #### 下载安装包，处理配置文件，并测试启动
@@ -51,6 +51,29 @@ mkdir ~/.halo && cd ~/.halo
 
 # 下载示例配置文件到 工作目录（不需要，直接用老的）
 wget https://dl.halo.run/config/application-template.yaml -O ./application.yaml （不需要下载，直接从老的服务器里拉过来）  
+
+# 下不到或者老文件丢失，就手动重建
+```bash
+cat > application.yaml <<'EOF'
+server:
+  port: 8090
+  compression:
+    enabled: false
+
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:file:~/.halo/db/halo
+    username: ******
+    password: ******
+
+  h2:
+    console:
+      enabled: false
+      settings:
+        web-allow-others: false
+EOF
+```
 
 # 编辑配置文件，配置数据库或者端口等，如需配置请参考 配置参考（不需要，直接用老的）
 vim application.yaml  
@@ -78,6 +101,29 @@ exit
 
 # 拷贝老服务器中的 halo.service 到新服务器  
 /etc/systemd/system/halo.service  
+
+# 用户名从halo改为halo-fx67ll了，文件需要修改下
+```bash
+cat > /etc/systemd/system/halo.service <<'EOF'
+[Unit]
+Description=Halo Service
+Documentation=https://docs.halo.run
+After=network.target
+
+[Service]
+Type=simple
+User=halo-fx67ll
+Group=halo-fx67ll
+WorkingDirectory=/home/halo-fx67ll/app
+ExecStart=/usr/bin/java -jar /home/halo-fx67ll/app/halo.jar
+Restart=always
+StandardOutput=journal+console
+StandardError=journal+console
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
 
 # 重新加载 systemd
 systemctl daemon-reload  

@@ -72,8 +72,7 @@ server {
 	listen  80;
 	server_name ez13.top;
 	location / {
-		proxy_pass http://ez13.top:1023;
-		# proxy_pass http://124.71.201.142:1023;
+		proxy_pass https://baota.fx67ll.com:10234;
 	}
 }
 
@@ -91,8 +90,98 @@ server
 	ssl_session_timeout           10m;
 	
 	location / {
-		proxy_pass http://ez13.top:1023;
-		# proxy_pass http://124.71.201.142:1023;
+		proxy_pass https://baota.fx67ll.com:10234;
 	}
 }
+```
+
+
+## 安全防护
+
+### 系统一键更新补丁
+```bash
+apt update && apt upgrade -y
+```
+
+### 检查系统被爆破登录的记录
+```bash
+grep Failed /var/log/auth.log
+```
+
+### 安装防爆破登录工具 fail2ban
+1. 安装 fail2ban（必走）
+```bash
+apt update -y
+apt install fail2ban -y
+```
+2. 开机自启 + 启动服务
+```bash
+systemctl enable --now fail2ban
+systemctl restart fail2ban
+```
+3. 生成安全配置（**防爆破最强规则，直接全部复制到shell里执行就可以了**）
+```bash
+cat > /etc/fail2ban/jail.d/sshd.conf <<EOF
+[sshd]
+enabled = true
+port = ssh
+filter = sshd
+logpath = /var/log/auth.log
+maxretry = 5
+bantime = 86400
+findtime = 600
+ignoreip = 127.0.0.1
+EOF
+```
+```shell
+# 安全配置说明
+maxretry = 5 → 最多错 5 次
+bantime = 86400 → 封 24 小时
+findtime = 600 → 10 分钟内
+```
+4. 重启生效
+```bash
+systemctl restart fail2ban
+```
+
+### fail2ban 日常使用命令
+1. 查看是否在运行
+```bash
+systemctl status fail2ban
+```
+2. 查看 SSH 防爆破状态（看封了谁）
+```bash
+fail2ban-client status sshd
+```
+3. 解封某个 IP（比如你自己误封）
+```bash
+fail2ban-client set sshd unbanip 1.2.3.4
+```
+4. 查看所有被 ban 的 IP
+```bash
+fail2ban-client banned
+```
+5. 查看配置设置
+```bash
+cat /etc/fail2ban/jail.d/sshd.conf
+```
+6. 修改配置设置（**Ctrl+O → 回车 → Ctrl+X 保存退出 → 必须重启才生效**）
+```bash
+nano /etc/fail2ban/jail.d/sshd.conf
+```
+7. 查看封禁日志
+```bash
+tail -f /var/log/fail2ban.log
+```
+8. 统计历史所有被Ban的攻击IP+次数
+```bash
+grep "Ban" /var/log/fail2ban.log |awk '{print $NF}'|sort|uniq -c|sort -nr
+```
+9. 统计今日封禁记录
+```bash
+grep $(date +%Y-%m-%d) /var/log/fail2ban.log |grep Ban
+```
+10. 统计SSH原生失败登录日志
+```bash
+grep Failed /var/log/auth.log
 ```
