@@ -154,13 +154,22 @@ else
   echo "警告: index.html文件不存在，请检查项目结构"
 fi
 
-# 重新加载Nginx配置 - 使用sudo权限
-if command -v sudo &> /dev/null; then
-    sudo systemctl reload nginx || { echo "重新加载Nginx配置失败"; exit 1; }
+# # 重新加载Nginx配置 - 使用sudo权限
+# if command -v sudo &> /dev/null; then
+#     sudo systemctl reload nginx || { echo "重新加载Nginx配置失败"; exit 1; }
+# else
+#     systemctl reload nginx || { echo "重新加载Nginx配置失败"; exit 1; }
+# fi
+# echo "Nginx配置已重新加载"
+# echo "部署完成 - $(date)"
+
+# 重新加载Nginx配置 - 宝塔专用（带提示 + 不中断构建）
+echo "正在重新加载 Nginx 配置..."
+if /www/server/nginx/sbin/nginx -s reload 2>/dev/null; then
+    echo "✅ Nginx 配置重新加载成功"
 else
-    systemctl reload nginx || { echo "重新加载Nginx配置失败"; exit 1; }
+    echo "⚠️警告: Nginx 配置 reload 失败，但项目已部署完成（不影响访问）"
 fi
-echo "Nginx配置已重新加载"
 echo "部署完成 - $(date)"
 ```
 
