@@ -1,0 +1,192 @@
+# Fire2Ban
+
+## 安装
+1. 安装 fail2ban（必走）
+```bash
+apt update -y
+apt install fail2ban -y
+```
+2. 开机自启 + 启动服务
+```bash
+systemctl enable --now fail2ban
+systemctl restart fail2ban
+```
+3. 生成安全配置（**防爆破最强规则，直接全部复制到shell里执行就可以了**）
+```bash
+cat > /etc/fail2ban/jail.d/sshd.conf <<EOF
+[sshd]
+enabled = true
+port = ssh
+filter = sshd
+logpath = /var/log/auth.log
+maxretry = 5
+bantime = 86400
+findtime = 600
+ignoreip = 127.0.0.1
+EOF
+```
+```shell
+# 安全配置说明
+maxretry = 5 → 最多错 5 次
+bantime = 86400 → 封 24 小时
+findtime = 600 → 10 分钟内
+```
+4. 重启生效
+```bash
+systemctl restart fail2ban
+```
+
+## 常用命令
+1. 查看是否在运行
+```bash
+systemctl status fail2ban
+```
+2. 查看 SSH 防爆破状态（看封了谁）
+```bash
+fail2ban-client status sshd
+```
+3. 解封某个 IP（比如你自己误封）
+```bash
+fail2ban-client set sshd unbanip 1.2.3.4
+```
+4. 查看所有被 ban 的 IP
+```bash
+fail2ban-client banned
+```
+5. 查看配置设置
+```bash
+cat /etc/fail2ban/jail.d/sshd.conf
+```
+6. 修改配置设置（**Ctrl+O → 回车 → Ctrl+X 保存退出 → 必须重启才生效**）
+```bash
+nano /etc/fail2ban/jail.d/sshd.conf
+```
+7. 查看封禁日志
+```bash
+tail -f /var/log/fail2ban.log
+```
+8. 统计历史所有被Ban的攻击IP+次数
+```bash
+grep "Ban" /var/log/fail2ban.log |awk '{print $NF}'|sort|uniq -c|sort -nr
+```
+9. 统计今日封禁记录
+```bash
+grep $(date +%Y-%m-%d) /var/log/fail2ban.log |grep Ban
+```
+10. 统计SSH原生失败登录日志
+```bash
+grep Failed /var/log/auth.log
+```
+
+------
+
+## Fire2Ban 拦截 Nginx 恶意ssl扫描
+
+### 1、生成SSL匹配过滤器（万能模糊匹配，适配宝塔Nginx日志）
+```bash
+cat > /etc/fail2ban/filter.d/ssl-fail.conf <<'EOF'
+[Definition]
+# 匹配包含 SSL + failed + client:IP 的异常握手报错
+failregex = .*SSL.*failed.*client: <HOST>
+ignoreregex =
+EOF
+```
+
+### 2、生成防护监狱配置（修正日志路径+白名单不变）
+```bash
+cat > /etc/fail2ban/jail.d/ssl-protect.conf <<'EOF'
+[ssl-protect]
+enabled = true
+filter = ssl-fail
+# 修复为你服务器真实nginx错误日志路径
+logpath = /www/wwwlogs/nginx_error.log
+# 10分钟内累计5次异常握手触发封禁
+maxretry = 4
+findtime = 60
+# 单次封禁24小时
+bantime = 86400
+# 多端口防火墙封禁
+banaction = iptables-multiport
+# 封禁该IP服务器所有端口，避免换端口扫描
+banaction_allports = true
+# 白名单：本地回环、阿里云内网段、本机公网IP，杜绝误封
+ignoreip = 127.0.0.1/8 ::1 172.16.0.0/12 124.71.201.142
+EOF
+```
+
+### 3、校验配置文件语法无错，重载Fail2ban
+```bash
+# 校验全局配置语法
+fail2ban-client -t
+# 热加载新规则，无需重启服务
+fail2ban-client reload
+```
+
+### 4、校验监狱是否正常加载运行
+```bash
+fail2ban-client status ssl-protect
+```
+正常输出：能看到日志文件路径、无报错，Failed/Banned初始为0（只统计增量新日志，旧历史日志不计入）
+
+### 5、测试正则匹配日志（自查核心命令）
+```bash
+# 正确顺序：日志文件 过滤器文件
+fail2ban-regex /www/wwwlogs/nginx_error.log /etc/fail2ban/filter.d/ssl-fail.conf
+```
+- 输出 `Failregex: 大于0` = 规则正常抓取SSL攻击日志
+- 输出 `Failregex: 0 total` = 日志无SSL失败记录或路径错误
+
+### 6、快速排查日志内SSL攻击记录
+```bash
+# 检索所有SSL握手失败历史记录
+grep -i "ssl.*failed" /www/wwwlogs/nginx_error.log
+# 实时监控新增SSL报错（新开窗口观察扫描流量）
+tail -f /www/wwwlogs/nginx_error.log | grep -i ssl
+```
+
+## Fire2Ban 后期运维全套自查/操作命令
+### 1、实时监控拦截行为
+```bash
+tail -f /var/log/fail2ban.log
+```
+出现 `Ban shturl.cc/8Eulw` 代表IP已成功封禁
+
+### 2、查看当前封禁IP列表
+```bash
+fail2ban-client status ssl-protect | grep Banned
+```
+
+### 3、手动解封误封IP（替换x.x.x.x为目标IP）
+```bash
+fail2ban-client set ssl-protect unbanip x.x.x.x
+```
+
+### 4、手动临时封禁测试IP
+```bash
+fail2ban-client set ssl-protect banip x.x.x.x
+```
+
+### 5、修改封禁参数示例（按需调整，改完必须重载）
+#### 场景1：网站访问量大，放宽阈值（10次失败再封禁）
+```bash
+sed -i 's/maxretry = 5/maxretry = 10/' /etc/fail2ban/jail.d/ssl-protect.conf
+fail2ban-client reload
+```
+#### 场景2：缩短封禁时长为1小时
+```bash
+sed -i 's/bantime = 86400/bantime = 3600/' /etc/fail2ban/jail.d/ssl-protect.conf
+fail2ban-client reload
+```
+
+### 6、彻底重置规则（规则异常时清空重建）
+```bash
+rm -f /etc/fail2ban/filter.d/ssl-fail.conf
+rm -f /etc/fail2ban/jail.d/ssl-protect.conf
+# 重新执行上方1、2步骤重建配置
+fail2ban-client reload
+```
+### 7、关键自查判断标准（后期排查直接对照）
+1. `fail2ban-client status ssl-protect` 报错找不到filter/jail → 配置文件缺失、文件名写错
+2. `fail2ban-regex` 匹配数为0 → 日志路径错误 或 日志无SSL失败记录
+3. 匹配数几千，但Total failed始终0 → 均为历史旧日志，仅新产生报错才会触发封禁
+4. 正常运行但频繁误封自己 → 检查ignoreip是否包含公网/内网网段
