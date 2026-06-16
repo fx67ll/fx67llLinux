@@ -101,8 +101,8 @@ filter = ssl-fail
 # 修复为你服务器真实nginx错误日志路径
 logpath = /www/wwwlogs/nginx_error.log
 # 10分钟内累计5次异常握手触发封禁
-maxretry = 4
-findtime = 60
+maxretry = 5
+findtime = 600
 # 单次封禁24小时
 bantime = 86400
 # 多端口防火墙封禁
@@ -190,3 +190,115 @@ fail2ban-client reload
 2. `fail2ban-regex` 匹配数为0 → 日志路径错误 或 日志无SSL失败记录
 3. 匹配数几千，但Total failed始终0 → 均为历史旧日志，仅新产生报错才会触发封禁
 4. 正常运行但频繁误封自己 → 检查ignoreip是否包含公网/内网网段
+
+------
+
+## 一、你现在确实有2个 Jail（监狱）
+1. `sshd`：防护SSH暴力破解
+2. `ssl-protect`：防护Nginx异常SSL握手扫描
+
+## 二、日常统一查看、维护全套操作
+### 1. 一次性查看所有监狱概况
+```bash
+fail2ban-client status
+```
+输出会列出全部启用的 jail：`sshd, ssl-protect`
+
+### 2. 分别查看单个监狱详情（失败次数、封禁IP列表）
+#### 查看SSH防爆破
+```bash
+fail2ban-client status sshd
+```
+#### 查看Nginx SSL扫描防护
+```bash
+fail2ban-client status ssl-protect
+```
+重点看两行：
+- `Currently banned`：当前封禁IP数量
+- `Banned IP list`：所有被封IP
+
+### 3. 一键列出全局所有被封禁IP（两个监狱合并）
+```bash
+fail2ban-client banned
+```
+
+### 4. 实时全局监控所有封禁动作（SSH+SSL扫描都会打印）
+```bash
+tail -f /var/log/fail2ban.log
+```
+日志关键字区分：
+- `sshd`：SSH密码爆破封禁
+- `ssl-protect`：恶意SSL扫描IP封禁
+
+### 5. 解封IP（分监狱操作，不能通用）
+#### 解封SSH误封IP
+```bash
+fail2ban-client set sshd unbanip 1.2.3.4
+```
+#### 解封SSL防护误封IP
+```bash
+fail2ban-client set ssl-protect unbanip 1.2.3.4
+```
+
+### 6. 手动临时封禁IP测试（对应两个监狱）
+```bash
+# SSH监狱封禁
+fail2ban-client set sshd banip 1.2.3.4
+# SSL防护监狱封禁
+fail2ban-client set ssl-protect banip 1.2.3.4
+```
+
+### 7. 分别校验两个监狱正则规则是否正常
+```bash
+# SSH规则校验（默认自带不用经常跑）
+fail2ban-regex /var/log/auth.log /etc/fail2ban/filter.d/sshd.conf
+
+# SSL Nginx规则校验（排查匹配0时必用）
+fail2ban-regex /www/wwwlogs/nginx_error.log /etc/fail2ban/filter.d/ssl-fail.conf
+```
+
+### 8. 修改配置后的统一重载（改任意配置都执行）
+修改 `sshd.conf` 或 `ssl-protect.conf` 后，不用重启服务，直接重载：
+```bash
+# 先校验语法，无报错再重载
+fail2ban-client -t
+fail2ban-client reload
+```
+
+### 9. 分别查看两个监狱配置文件
+```bash
+# SSH配置
+cat /etc/fail2ban/jail.d/sshd.conf
+
+# SSL防护配置
+cat /etc/fail2ban/jail.d/ssl-protect.conf
+```
+
+## 三、日常巡检最简流程（每天排查一套命令）
+1. 看服务是否存活
+```bash
+systemctl status fail2ban
+```
+2. 看所有监狱运行状态
+```bash
+fail2ban-client status
+```
+3. 看当前封禁IP总量
+```bash
+fail2ban-client banned
+```
+4. 实时看今天新增拦截记录
+```bash
+grep $(date +%Y-%m-%d) /var/log/fail2ban.log | grep Ban
+```
+5. 异常排查：实时监控攻击日志
+```bash
+tail -f /var/log/fail2ban.log
+```
+
+## 四、常见区分问题
+1. 误封自己：两个配置 `ignoreip` 都要加上你的公网IP，缺一不可
+   - `/etc/fail2ban/jail.d/sshd.conf`
+   - `/etc/fail2ban/jail.d/ssl-protect.conf`
+2. 匹配不到攻击：分别对对应 jail 执行 `fail2ban-regex` 排查日志路径、正则
+3. 规则不生效：修改配置后必须 `reload`，不要只重启服务
