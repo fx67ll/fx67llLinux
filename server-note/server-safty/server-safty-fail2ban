@@ -274,6 +274,15 @@ cat /etc/fail2ban/jail.d/sshd.conf
 cat /etc/fail2ban/jail.d/ssl-protect.conf
 ```
 
+### 10. 追加指定IP到两个监狱的IgnoreIP
+```bash
+# SSH配置
+sed -i '/^ignoreip/s/$/ 127.0.0.1/' /etc/fail2ban/jail.d/sshd.conf
+
+# SSL防护配置
+sed -i '/^ignoreip/s/$/ 127.0.0.1/' /etc/fail2ban/jail.d/ssl-protect.conf
+```
+
 ## 三、日常巡检最简流程（每天排查一套命令）
 1. 看服务是否存活
 ```bash
