@@ -109,8 +109,8 @@ bantime = 86400
 banaction = iptables-multiport
 # 封禁该IP服务器所有端口，避免换端口扫描
 banaction_allports = true
-# 白名单：本地回环、阿里云内网段、本机公网IP，杜绝误封
-ignoreip = 127.0.0.1/8 ::1 172.16.0.0/12 124.71.201.142
+# 白名单：本地回环杜绝误封
+ignoreip = 127.0.0.1
 EOF
 ```
 
@@ -311,3 +311,366 @@ tail -f /var/log/fail2ban.log
    - `/etc/fail2ban/jail.d/ssl-protect.conf`
 2. 匹配不到攻击：分别对对应 jail 执行 `fail2ban-regex` 排查日志路径、正则
 3. 规则不生效：修改配置后必须 `reload`，不要只重启服务
+
+------
+
+# 完整Fail2ban防护部署与运维手册（SSH + Nginx SSL + MySQL + Redis + MongoDB 五套监狱完整版）
+> 适配宝塔Linux面板，生产可用，全流程可一键迁移，包含5类端口暴力/扫描防护
+> 内置过滤器、监狱配置、校验命令、运维操作、巡检流程、排错、迁移清单
+
+---
+
+## 一、五套防护监狱完整部署流程
+### 1、防护SSH 22端口暴力破解
+```bash
+cat > /etc/fail2ban/jail.d/sshd.conf <<'EOF'
+[sshd]
+enabled = true
+port = 22
+filter = sshd
+logpath = /var/log/auth.log
+maxretry = 5
+findtime = 600
+bantime = 86400
+ignoreip = 127.0.0.1
+EOF
+```
+
+### 2、拦截Nginx恶意SSL握手扫描
+```bash
+# SSL握手异常过滤器
+cat > /etc/fail2ban/filter.d/ssl-fail.conf <<'EOF'
+[Definition]
+failregex = .*SSL.*failed.*client: <HOST>
+ignoreregex =
+EOF
+
+# SSL防护监狱
+cat > /etc/fail2ban/jail.d/ssl-protect.conf <<'EOF'
+[ssl-protect]
+enabled = true
+filter = ssl-fail
+logpath = /www/wwwlogs/nginx_error.log
+maxretry = 5
+findtime = 600
+bantime = 86400
+banaction = iptables-multiport
+banaction_allports = true
+ignoreip = 127.0.0.1
+EOF
+```
+
+### 3、MySQL 3306数据库防爆破
+```bash
+# MySQL过滤器
+cat > /etc/fail2ban/filter.d/mysql.conf <<'EOF'
+[INCLUDES]
+before = common.conf
+
+[Definition]
+_daemon = mysqld
+# 万能匹配：时间开头，中间任意字符，最后匹配Access denied + <HOST>
+failregex = ^.*Access denied for user .*@'<HOST>'
+ignoreregex =
+EOF
+
+# MySQL监狱配置
+cat > /etc/fail2ban/jail.d/mysql.conf <<'EOF'
+[mysql]
+enabled = true
+port = 3306
+filter = mysql
+# 迁移时替换为本机实际主机名日志文件
+logpath = /www/server/data/hcss-ecs-695e.err
+maxretry = 5
+findtime = 600
+bantime = 86400
+action = iptables[name=MySQL, port=3306, protocol=tcp]
+ignoreip = 127.0.0.1
+EOF
+```
+
+#### MySQL前置优化（必须执行否则匹配失效）
+```bash
+# 开启详细登录错误日志
+grep log_error_verbosity /etc/my.cnf
+# 无输出则写入配置
+sed -i '/\[mysqld\]/a log_error_verbosity = 3' /etc/my.cnf
+# 重启MySQL
+/etc/init.d/mysqld restart
+# 赋予日志可读权限
+chmod 644 /www/server/data/hcss-ecs-695e.err
+# 查看历史爆破记录
+grep "Access denied" /www/server/data/hcss-ecs-695e.err | tail -20
+```
+
+### 4、Redis 6379防爆破（新增）
+```bash
+# Redis认证失败过滤器
+cat > /etc/fail2ban/filter.d/redis.conf <<'EOF'
+[Definition]
+failregex = ^.*Failed password for user .* from <HOST>
+            ^.*Authentication failed for user .* from <HOST>
+            ^.*ERR invalid password from <HOST>
+            ^.*Client sent AUTH, but no password is set from <HOST>
+ignoreregex =
+EOF
+
+# Redis监狱配置
+cat > /etc/fail2ban/jail.d/redis.conf <<'EOF'
+[redis]
+enabled = true
+port = 6379
+filter = redis
+logpath = /www/server/redis/redis.log
+maxretry = 5
+findtime = 600
+bantime = 86400
+action = iptables[name=Redis, port=6379, protocol=tcp]
+ignoreip = 127.0.0.1
+EOF
+```
+
+### 5、MongoDB 27017防爆破（新增）
+```bash
+# MongoDB认证失败过滤器
+cat > /etc/fail2ban/filter.d/mongodb.conf <<'EOF'
+[Definition]
+# 多种认证失败关键词，兼容各Mongo版本
+failregex = .*"msg":"(Auth failed|Authentication failed|Authentication failure|login failed|Unauthorized|auth error)".*"(remote|client)":"<HOST>:\d+"
+# 端口扫描、恶意连接重置
+            .*"errmsg":".*Connection reset by peer".*"(remote|client)":"<HOST>:\d+"
+# 异常中途断连探测
+            .*"Interrupted operation as its client disconnected".*"(remote|client)":"<HOST>:\d+"
+
+# 适配宝塔Mongo标准JSON日志时间戳
+datepattern = {"t":{"\$date":"%%Y-%%m-%%dT%%H:%%M:%%S\.%%f\+\d{2}:\d{2}"}}
+
+# 正确忽略本地127.0.0.1连接，修复引号转义
+ignoreregex = "\"(remote|client)\":\"127\.0\.0\.1:"
+EOF
+
+# MongoDB监狱配置
+cat > /etc/fail2ban/jail.d/mongodb.conf <<'EOF'
+[mongodb]
+enabled = true
+port = 27017
+filter = mongodb
+logpath = /www/server/mongodb/log/config.log
+maxretry = 5
+findtime = 600
+bantime = 86400
+action = iptables[name=MongoDB, port=27017, protocol=tcp]
+ignoreip = 127.0.0.1
+EOF
+```
+
+### 6、全局配置校验 & 热加载所有规则
+```bash
+# 语法校验，无报错再重载
+fail2ban-client -t
+# 热加载，不清除现有封禁
+fail2ban-client reload
+```
+
+### 7、查看全部5个监狱运行状态
+```bash
+# 汇总查看所有启用监狱，预期输出：sshd, ssl-protect, mysql, redis, mongodb
+fail2ban-client status
+
+# 逐个查看单监狱详情
+fail2ban-client status sshd
+fail2ban-client status ssl-protect
+fail2ban-client status mysql
+fail2ban-client status redis
+fail2ban-client status mongodb
+```
+> 正常表现：日志路径正常显示，Failed/Banned初始为0，仅统计重载后新增日志，历史旧日志不计数。
+
+### 8、全量正则匹配测试（迁移部署必跑）
+```bash
+# SSH
+fail2ban-regex /var/log/auth.log /etc/fail2ban/filter.d/sshd.conf
+# Nginx SSL扫描
+fail2ban-regex /www/wwwlogs/nginx_error.log /etc/fail2ban/filter.d/ssl-fail.conf
+# MySQL
+fail2ban-regex /www/server/data/hcss-ecs-695e.err /etc/fail2ban/filter.d/mysql.conf
+# Redis
+fail2ban-regex /www/server/redis/redis.log /etc/fail2ban/filter.d/redis.conf
+# MongoDB
+fail2ban-regex /www/server/mongodb/log/config.log /etc/fail2ban/filter.d/mongodb.conf
+```
+- Failregex总数＞0：规则正常抓取攻击日志
+- Failregex=0：日志路径错误 / 暂无对应攻击日志
+
+---
+
+## 二、全套运维操作命令（5监狱统一管理）
+### 1、实时全局监控所有封禁行为
+```bash
+tail -f /var/log/fail2ban.log
+```
+日志标识区分：
+- `[sshd] Ban x.x.x.x`：SSH爆破封禁
+- `[ssl-protect] Ban x.x.x.x`：SSL恶意扫描封禁
+- `[mysql] Ban x.x.x.x`：MySQL数据库爆破
+- `[redis] Ban x.x.x.x`：Redis未授权/密码爆破
+- `[mongodb] Ban x.x.x.x`：MongoDB账户暴力破解
+
+### 2、分监狱查看当前封禁IP
+```bash
+fail2ban-client status sshd | grep Banned
+fail2ban-client status ssl-protect | grep Banned
+fail2ban-client status mysql | grep Banned
+fail2ban-client status redis | grep Banned
+fail2ban-client status mongodb | grep Banned
+```
+
+### 3、一键输出全服务器所有封禁IP（5监狱合并）
+```bash
+fail2ban-client banned
+```
+
+### 4、分监狱手动解封误封IP
+```bash
+# SSH
+fail2ban-client set sshd unbanip 1.2.3.4
+# SSL扫描防护
+fail2ban-client set ssl-protect unbanip 1.2.3.4
+# MySQL
+fail2ban-client set mysql unbanip 1.2.3.4
+# Redis
+fail2ban-client set redis unbanip 1.2.3.4
+# MongoDB
+fail2ban-client set mongodb unbanip 1.2.3.4
+```
+
+### 5、手动临时封禁测试IP（分监狱）
+```bash
+fail2ban-client set sshd banip 1.2.3.4
+fail2ban-client set ssl-protect banip 1.2.3.4
+fail2ban-client set mysql banip 1.2.3.4
+fail2ban-client set redis banip 1.2.3.4
+fail2ban-client set mongodb banip 1.2.3.4
+```
+
+### 6、批量修改封禁阈值/封禁时长
+#### 场景1：放宽失败次数阈值为10次
+```bash
+sed -i 's/maxretry = 5/maxretry = 10/' /etc/fail2ban/jail.d/sshd.conf
+sed -i 's/maxretry = 5/maxretry = 10/' /etc/fail2ban/jail.d/ssl-protect.conf
+sed -i 's/maxretry = 5/maxretry = 10/' /etc/fail2ban/jail.d/mysql.conf
+sed -i 's/maxretry = 5/maxretry = 10/' /etc/fail2ban/jail.d/redis.conf
+sed -i 's/maxretry = 5/maxretry = 10/' /etc/fail2ban/jail.d/mongodb.conf
+fail2ban-client reload
+```
+
+#### 场景2：缩短封禁时间为1小时（3600秒）
+```bash
+sed -i 's/bantime = 86400/bantime = 3600/' /etc/fail2ban/jail.d/sshd.conf
+sed -i 's/bantime = 86400/bantime = 3600/' /etc/fail2ban/jail.d/ssl-protect.conf
+sed -i 's/bantime = 86400/bantime = 3600/' /etc/fail2ban/jail.d/mysql.conf
+sed -i 's/bantime = 86400/bantime = 3600/' /etc/fail2ban/jail.d/redis.conf
+sed -i 's/bantime = 86400/bantime = 3600/' /etc/fail2ban/jail.d/mongodb.conf
+fail2ban-client reload
+```
+
+### 7、查看各监狱原始配置文件
+```bash
+cat /etc/fail2ban/jail.d/sshd.conf
+cat /etc/fail2ban/jail.d/ssl-protect.conf
+cat /etc/fail2ban/jail.d/mysql.conf
+cat /etc/fail2ban/jail.d/redis.conf
+cat /etc/fail2ban/jail.d/mongodb.conf
+```
+
+### 8、批量新增白名单IP（所有监狱同步添加）
+```bash
+NEW_IP="123.45.67.89"
+sed -i "/^ignoreip/s/$/ $NEW_IP/" /etc/fail2ban/jail.d/sshd.conf
+sed -i "/^ignoreip/s/$/ $NEW_IP/" /etc/fail2ban/jail.d/ssl-protect.conf
+sed -i "/^ignoreip/s/$/ $NEW_IP/" /etc/fail2ban/jail.d/mysql.conf
+sed -i "/^ignoreip/s/$/ $NEW_IP/" /etc/fail2ban/jail.d/redis.conf
+sed -i "/^ignoreip/s/$/ $NEW_IP/" /etc/fail2ban/jail.d/mongodb.conf
+fail2ban-client reload
+```
+
+### 9、重置单个监狱配置（异常重建示例，以redis为例）
+```bash
+rm -f /etc/fail2ban/filter.d/redis.conf
+rm -f /etc/fail2ban/jail.d/redis.conf
+# 重新执行上文Redis部署代码重建配置
+fail2ban-client reload
+```
+
+---
+
+## 三、每日巡检最简流程（一键排查）
+```bash
+# 1. 检查Fail2ban服务运行状态
+systemctl status fail2ban
+
+# 2. 汇总所有监狱状态
+fail2ban-client status
+
+# 3. 列出所有被封禁IP
+fail2ban-client banned
+
+# 4. 查看今日新增封禁记录
+grep $(date +%Y-%m-%d) /var/log/fail2ban.log | grep Ban
+
+# 5. 实时跟踪攻击拦截日志
+tail -f /var/log/fail2ban.log
+```
+
+---
+
+## 四、分模块排错指南
+### 通用故障
+1. 本机被误封：**5个jail配置的ignoreip必须全部填入本机公网IP**，缺一不可；
+2. 正则匹配数为0：核对日志文件路径、文件读取权限、日志是否存在对应报错；
+3. 修改配置不生效：必须执行 `fail2ban-client reload`，仅重启服务无法热加载；
+4. status提示找不到filter/jail：配置文件名写错、语法引号/换行错误，用`fail2ban-client -t`定位报错。
+
+### MySQL专属故障
+1. 匹配无数据但日志存在Access denied：未开启`log_error_verbosity=3`或日志权限不足；
+2. 日志路径报错：执行 `grep log_error /etc/my.cnf` 获取真实错误日志文件名替换logpath。
+
+### SSL扫描监狱专属故障
+1. 正常用户频繁误封：调高maxretry至10~15；
+2. 封禁后仍可访问网站：确认 `banaction_allports = true` 配置存在，封禁IP全端口。
+
+### Redis专属故障
+1. 匹配0：确认redis.log内有AUTH认证失败日志，宝塔Redis默认关闭日志可在面板开启。
+
+### MongoDB专属故障
+1. 匹配0：检查MongoDB是否开启权限认证，无密码登录不会产生认证失败日志。
+
+---
+
+## 五、服务器迁移完整检查清单
+✅ 1. 安装服务
+CentOS：`yum install fail2ban -y`
+Debian/Ubuntu：`apt install fail2ban -y`
+
+✅ 2. 复制全部过滤器文件至 `/etc/fail2ban/filter.d/`
+sshd(内置)、ssl-fail.conf、mysql.conf、redis.conf、mongodb.conf
+
+✅ 3. 复制所有监狱配置至 `/etc/fail2ban/jail.d/`
+sshd.conf、ssl-protect.conf、mysql.conf、redis.conf、mongodb.conf
+
+✅ 4. 统一修改全部jail文件内`ignoreip`为本机公网IP、内网网段
+
+✅ 5. 修正mysql.conf内logpath为当前服务器MySQL错误日志文件名
+
+✅ 6. MySQL执行前置优化脚本开启详细错误日志
+
+✅ 7. 校验全局语法 `fail2ban-client -t`
+
+✅ 8. 热加载规则 `fail2ban-client reload`
+
+✅ 9. 查看状态确认5个监狱全部正常加载
+
+✅ 10. 逐条执行fail2ban-regex校验所有过滤器匹配正常
+
+✅ 11. 手动ban一个测试IP，验证iptables封禁功能生效
