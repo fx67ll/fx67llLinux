@@ -463,7 +463,30 @@ bantime = 86400
 action = iptables[name=MongoDB, port=27017, protocol=tcp]
 ignoreip = 127.0.0.1
 EOF
+
+# Recidive监狱配置
+# Recidive 惯犯加重封禁监狱（全自动分级处罚）
+# 利用 Fail2ban 原生自带的 recidive 过滤器，无需自定义 filter
+# 规则：30 天内累计被任意监狱封禁 3 次的 IP，自动升级为永久封禁
+cat > /etc/fail2ban/jail.d/recidive.conf <<'EOF'
+[recidive]
+enabled  = true
+filter   = recidive
+logpath  = /var/log/fail2ban.log
+findtime = 2592000
+maxretry = 3
+bantime  = -1
+banaction = iptables-multiport
+banaction_allports = true
+ignoreip = 127.0.0.1
+EOF
 ```
+
+fail2ban-client -t
+
+systemctl reload fail2ban
+
+fail2ban-client status recidive
 
 ### 6、全局配置校验 & 热加载所有规则
 ```bash
