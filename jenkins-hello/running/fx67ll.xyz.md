@@ -200,6 +200,121 @@ fi
 echo "部署完成 - $(date)"
 ```
 
+#### v3
+```shell
+#!/bin/bash
+
+# 记录执行日志
+echo "开始部署 - $(date)"
+
+# 显示当前路径和Java版本
+pwd
+java -version
+
+# 确定Nginx用户
+NGINX_USER=$(ps aux | grep nginx | grep -v grep | awk '{print $1}' | head -1)
+if [ -z "$NGINX_USER" ]; then
+    # 如果无法通过进程确定用户，则使用常见的默认值
+    if [ -f /etc/debian_version ]; then
+        NGINX_USER="www-data"
+    else
+        NGINX_USER="nginx"
+    fi
+fi
+echo "检测到Nginx用户: $NGINX_USER"
+
+# 进入项目目录
+cd fx67ll.xyz || { echo "无法进入项目目录"; exit 1; }
+
+# 修正 index.html 中的静态资源路径（fx67ll.xyz-lib 已更名为 nav.fx67ll.com）
+if [ -f "./index.html" ]; then
+  sed -i 's#fx67ll\.xyz-lib#nav.fx67ll.com#g' index.html
+  echo "已将 index.html 中的资源路径从 fx67ll.xyz-lib 改为 nav.fx67ll.com"
+else
+  echo "警告: index.html 不存在，跳过路径修正"
+fi
+
+# 检查并删除已存在的tar文件
+if [ -f "./dist.tar.gz" ]; then
+  rm -f dist.tar.gz
+  echo "已删除旧的dist.tar.gz文件"
+else
+  echo "dist.tar.gz文件不存在，继续执行"
+fi
+
+# 创建新的tar包
+tar -zcvf dist.tar.gz ./* || { echo "创建tar包失败"; exit 1; }
+echo "成功创建tar包"
+
+# 切换到Nginx目录
+cd /usr/share/nginx/html-8070 || { echo "无法进入Nginx目录"; exit 1; }
+
+# 备份当前内容
+if [ "$(ls -A)" ]; then
+  mv * "/tmp/nginx_backup_$(date +%Y%m%d%H%M%S)"
+  echo "已备份当前Nginx内容"
+fi
+
+# 复制tar包到Nginx目录
+cd /root/.jenkins/workspace/fx67ll.xyz/fx67ll.xyz || { echo "无法进入工作目录"; exit 1; }
+scp /root/.jenkins/workspace/fx67ll.xyz/fx67ll.xyz/dist.tar.gz /usr/share/nginx/html-8070 || { echo "复制tar包失败"; exit 1; }
+rm -f ./dist.tar.gz
+echo "已复制tar包并删除源文件"
+
+# 解压tar包到Nginx目录
+cd /usr/share/nginx/html-8070 || { echo "无法进入Nginx目录"; exit 1; }
+tar -zxvf dist.tar.gz -C ./ || { echo "解压tar包失败"; exit 1; }
+rm -f dist.tar.gz
+
+# 设置正确的文件权限 - 使用检测到的Nginx用户
+chown -R $NGINX_USER:$NGINX_USER /usr/share/nginx/html-8070 || { echo "设置文件所有者失败，尝试使用单用户"; chown -R $NGINX_USER /usr/share/nginx/html-8070 || { echo "仍然无法设置文件所有者，请检查用户权限"; exit 1; } }
+chmod -R 755 /usr/share/nginx/html-8070 || { echo "设置文件权限失败"; exit 1; }
+echo "已设置正确的文件权限"
+
+# 检查index.html是否存在
+if [ -f "/usr/share/nginx/html-8070/index.html" ]; then
+  echo "部署成功: index.html文件存在"
+else
+  echo "警告: index.html文件不存在，请检查项目结构"
+fi
+
+# ===== 更新 error-page 错误页 =====
+# nginx 的 error_page 指向 /usr/share/nginx/html/error-page/，与主站(html-8070)分开存放，
+# 主部署的 tar 包不会覆盖它，所以这里单独同步：先删整个目录再从源码复制新的。
+ERROR_PAGE_SRC="/root/.jenkins/workspace/fx67ll.xyz/fx67ll.xyz/error-page"
+ERROR_PAGE_DST="/usr/share/nginx/html/error-page"
+echo "开始更新 error-page 错误页..."
+if [ -d "$ERROR_PAGE_SRC" ]; then
+  # 备份并删除旧的 error-page 整个目录
+  if [ -d "$ERROR_PAGE_DST" ]; then
+    mv "$ERROR_PAGE_DST" "/tmp/error_page_backup_$(date +%Y%m%d%H%M%S)"
+    echo "已备份旧 error-page 目录"
+  fi
+  # 复制新的 error-page（保留目录结构）
+  cp -r "$ERROR_PAGE_SRC" "$ERROR_PAGE_DST" || { echo "复制 error-page 失败"; exit 1; }
+  # 设置权限
+  chown -R $NGINX_USER:$NGINX_USER "$ERROR_PAGE_DST" || chown -R $NGINX_USER "$ERROR_PAGE_DST" || echo "警告: error-page 设置所有者失败"
+  chmod -R 755 "$ERROR_PAGE_DST" || echo "警告: error-page 设置权限失败"
+  # 校验关键文件
+  if [ -f "$ERROR_PAGE_DST/40x/common/404.html" ] && [ -f "$ERROR_PAGE_DST/50x/common/50x.html" ]; then
+    echo "✅ error-page 更新成功: 404.html 与 50x.html 均存在"
+  else
+    echo "⚠️警告: error-page 关键文件缺失，请检查源码结构"
+  fi
+else
+  echo "⚠️警告: 源 error-page 目录不存在 ($ERROR_PAGE_SRC)，跳过错误页更新"
+fi
+
+# 重新加载Nginx配置 - 宝塔专用（带提示 + 不中断构建）
+echo "正在重新加载 Nginx 配置..."
+if /www/server/nginx/sbin/nginx -s reload 2>/dev/null; then
+    echo "✅ Nginx 配置重新加载成功"
+else
+    echo "⚠️警告: Nginx 配置 reload 失败，但项目已部署完成（不影响访问）"
+fi
+echo "部署完成 - $(date)"
+```
+
 
 ### `fx67ll.xyz`在`github`中用的`Personal access tokens`是`jenkins-token-test`  
 ### `ssh钥匙`统一用`fx67ll ifnxs`  
