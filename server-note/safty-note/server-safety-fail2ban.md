@@ -1,5 +1,9 @@
 # Fire2Ban
 
+**汇总Blog地址：fx67llLinux\serve-blog\2026\2026-08\server-safety-fal2ban-blog.md**
+
+---
+
 ## 安装
 1. 安装 fail2ban（必走）
 ```bash
