@@ -1,5 +1,7 @@
 # 服务器被 NTR 事件记录
 
+**汇总Blog地址：fx67llLinux\serve-blog\2026\2026-06\server-safety-event-blog.md**
+
 ---
 
 ## 服务器攻击分析报告

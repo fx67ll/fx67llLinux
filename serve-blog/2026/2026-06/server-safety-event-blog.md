@@ -346,3 +346,9 @@ grep $(date +%Y-%m-%d) /var/log/fail2ban.log | grep Ban
 3. 每年进行一次渗透测试
 
 > ⚠️ 最后提醒：服务器安全是一个持续的过程，没有一劳永逸的解决方案。保持警惕，定期检查，及时更新，才能有效防范各类攻击。
+
+---
+
+我是 [fx67ll.com](https://fx67ll.com)，如果您发现本文有什么错误，欢迎在评论区讨论指正，感谢您的阅读！
+如果您喜欢这篇文章，欢迎访问我的 [本文 github 仓库地址](https://github.com/fx67ll/fx67llLinux/serve-blog/2026/2026-06/server-safety-event-blog.md)，为我点一颗 Star，Thanks~ :)
+***转发请注明参考文章地址，非常感谢！！！***
