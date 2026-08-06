@@ -1,6 +1,10 @@
 # 服务器被 NTR 事件记录
 
+---
+
+**最后更新时间：2026年8月6日**
 **汇总Blog地址：fx67llLinux\serve-blog\2026\2026-06\server-safety-event-blog.md**
+**后续汇总清单手册地址：fx67llLinux\server-note\operation-note\03-安全防护检查清单**
 
 ---
 
@@ -334,7 +338,7 @@ findtime = 600
 ignoreip = 127.0.0.1
 EOF
 ```
-```shell
+```bash
 # 安全配置说明
 maxretry = 5 → 最多错 5 次
 bantime = 86400 → 封 24 小时

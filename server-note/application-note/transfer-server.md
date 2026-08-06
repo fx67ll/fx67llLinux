@@ -1,5 +1,11 @@
 # 后端服务迁移流程记录
 
+---
+
+**最后更新时间：2026年8月6日**
+**后续汇总清单手册地址：fx67llLinux\server-note\operation-note\02-服务器迁移检查清单.md**
+
+---
 
 ## 主要流程
 1. 安装宝塔面板，宝塔相关服务可以在linux上输入`bt`命令  
@@ -59,8 +65,10 @@ scp /path/to/redis/dump.rdb user@newserver:/path/to/redis/
 redis-server --port 6379 --bind 0.0.0.0 --dir /path/to/redis/ --dbfilename dump.rdb
 ```
 
+---
 
-## 宝塔面板绑定域名以及ssl证书的流程
+## 宝塔面板
+### 绑定域名以及ssl证书的流程
 1. 先关闭面板本身的 *ssl开关* ，可视化界面关闭不一定成功，在 *ssh面板* 输入 `bt` 命令关闭即可  
 2. 可以绑定域名访问，也可以不绑定域名访问，绑定后仍然需要使用 `域名+端口号` 的方式访问  
 3. 监听 `80端口`，使用 *nginx代理* 原来宝塔的 `http地址` 就可以完成域名绑定
@@ -95,9 +103,9 @@ server
 }
 ```
 
+---
 
 ## 安全防护
-
 ### 系统一键更新补丁
 ```bash
 apt update && apt upgrade -y
@@ -133,7 +141,7 @@ findtime = 600
 ignoreip = 127.0.0.1
 EOF
 ```
-```shell
+```bash
 # 安全配置说明
 maxretry = 5 → 最多错 5 次
 bantime = 86400 → 封 24 小时

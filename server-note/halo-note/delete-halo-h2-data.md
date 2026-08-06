@@ -1,7 +1,7 @@
 # 删除halo数据库H2中的同名图片
 
 #### 修改配置文件
-```shell
+```bash
 # 暂停 halo 运行
 systemctl stop halo  
 

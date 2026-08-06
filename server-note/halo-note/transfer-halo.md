@@ -1,8 +1,16 @@
 # 记录一下halo迁移流程和命令
 
+---
+
+**最后更新时间：2026年8月6日**
+**后续汇总清单手册地址：fx67llLinux\server-note\operation-note\02-服务器迁移检查清单.md**
+
+---
+
 最近西部数码的服务器到期了，费用和速度我都不是太满意，所以就决定换到华为轻量云服务，这里记录一下博客站点的迁移过程~  
 我的原服务器因为速度不理想，所以我还开通了华为云的cdn服务加速，如果有需要看这个博文的小伙伴，可以忽略cdn部分的内容~  
 
+---
 
 ### 前置条件
 1. 新服务器安装 java jdk
@@ -15,6 +23,7 @@
 6. 然后配置好`nginx.conf`*（最好先不配置https，确保http下可以访问再配置）*，启动全新的应用，在引导界面选择老数据导入，使用第一步里导出的`data.json`即可  
 7. 最后再将第4步里的所有文件夹直接覆盖到新的服务器目录`/home/halo/.halo`下的同文件夹中即可*（导出的时候新老服务器里的应用最好停止再处理）*  
 
+---
 
 ### 安装命令
 #### 先准备好 halo 运行用户
@@ -33,7 +42,7 @@ su - halo-fx67ll
 ```
 
 #### 下载安装包，处理配置文件，并测试启动
-```
+```bash
 # 创建存放 运行包 的目录，这里以 ~/app 为例
 mkdir ~/app && cd ~/app  
 
@@ -53,7 +62,6 @@ mkdir ~/.halo && cd ~/.halo
 wget https://dl.halo.run/config/application-template.yaml -O ./application.yaml （不需要下载，直接从老的服务器里拉过来）  
 
 # 下不到或者老文件丢失，就手动重建
-```bash
 cat > application.yaml <<'EOF'
 server:
   port: 8090
@@ -73,7 +81,6 @@ spring:
       settings:
         web-allow-others: false
 EOF
-```
 
 # 编辑配置文件，配置数据库或者端口等，如需配置请参考 配置参考（不需要，直接用老的）
 vim application.yaml  
@@ -93,7 +100,7 @@ run.halo.app.listener.StartedListener    : Halo has started successfully!
 ```
 
 #### 配置 halo 应用作为服务运行
-```
+```bash
 # 作为服务运行。
 # 需要退出 halo 账户，登录到 root 账户。
 # 如果当前就是 root 账户，请略过此步骤。
@@ -103,7 +110,6 @@ exit
 /etc/systemd/system/halo.service  
 
 # 用户名从halo改为halo-fx67ll了，文件需要修改下
-```bash
 cat > /etc/systemd/system/halo.service <<'EOF'
 [Unit]
 Description=Halo Service
@@ -123,7 +129,6 @@ StandardError=journal+console
 [Install]
 WantedBy=multi-user.target
 EOF
-```
 
 # 重新加载 systemd
 systemctl daemon-reload  
@@ -138,10 +143,11 @@ systemctl enable halo
 systemctl status halo  
 ```
 
+---
 
 ### 其他
 #### 废弃的 halo.service 获取方式
-```
+```bash
 # 下载 Halo 官方的 halo.service 模板（废弃）
 # wget https://dl.halo.run/config/halo.service -O /etc/systemd/system/halo.service（直接从老服务器拉）
 
@@ -154,7 +160,7 @@ vim /etc/systemd/system/halo.service
 ```
 
 #### halo.service 示例配置
-```
+```bash
 [Unit]
 Description=Halo Service
 Documentation=https://halo.run
@@ -176,7 +182,7 @@ WantedBy=multi-user.target
 ```
 
 #### halo.service 修改后的配置
-```
+```bash
 [Unit]
 Description=Halo Service
 Documentation=https://docs.halo.run
