@@ -1,4 +1,4 @@
-# Fire2Ban
+# Fail2Ban
 
 ---
 
@@ -88,7 +88,7 @@ grep Failed /var/log/auth.log
 
 ------
 
-## Fire2Ban 拦截 Nginx 恶意ssl扫描
+## Fail2Ban 拦截 Nginx 恶意ssl扫描
 
 ### 1、生成SSL匹配过滤器（万能模糊匹配，适配宝塔Nginx日志）
 ```bash
@@ -152,7 +152,7 @@ grep -i "ssl.*failed" /www/wwwlogs/nginx_error.log
 tail -f /www/wwwlogs/nginx_error.log | grep -i ssl
 ```
 
-## Fire2Ban 后期运维全套自查/操作命令
+## Fail2Ban 后期运维全套自查/操作命令
 ### 1、实时监控拦截行为
 ```bash
 tail -f /var/log/fail2ban.log
