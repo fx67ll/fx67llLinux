@@ -120,6 +120,113 @@ fi
 echo "部署完成 - $(date)"
 ```
 
+#### v3
+```shell
+#!/bin/bash
+
+# 记录执行日志
+echo "开始部署 - $(date)"
+
+########################### 可配置变量区 ###########################
+PROJECT_NAME=fx67ll.com
+PROJECT_PORT=1997
+# Jenkins工作空间项目根目录（Jenkins会把代码拉到此目录）
+JENKINS_WORKSPACE="/root/.jenkins/workspace/${PROJECT_NAME}"
+# nginx站点根目录
+NGINX_WEB_ROOT="/usr/share/nginx/html-${PROJECT_PORT}"
+####################################################################
+
+echo "本次编译项目名称：$PROJECT_NAME，项目编号：$PROJECT_PORT"
+echo "项目源目录：${JENKINS_WORKSPACE}"
+echo "Nginx目标目录：${NGINX_WEB_ROOT}"
+
+# 显示当前路径和Java/Node版本
+pwd
+java -version
+node -v
+npm -v
+
+# 确定Nginx用户
+NGINX_USER=$(ps aux | grep nginx | grep -v grep | awk '{print $1}' | head -1)
+if [ -z "$NGINX_USER" ]; then
+    # 如果无法通过进程确定用户，则使用常见的默认值
+    if [ -f /etc/debian_version ]; then
+        NGINX_USER="www-data"
+    else
+        NGINX_USER="nginx"
+    fi
+fi
+echo "检测到Nginx用户: $NGINX_USER"
+
+# ========== 直接使用项目根目录全部文件打包，不再进入dist ==========
+cd "${JENKINS_WORKSPACE}" || { echo "❌ 无法进入Jenkins项目根目录: ${JENKINS_WORKSPACE}"; exit 1; }
+
+# 清理旧打包文件
+TAR_NAME=deploy.tar.gz
+if [ -f "./${TAR_NAME}" ]; then
+    rm -f "${TAR_NAME}"
+    echo "已删除旧的${TAR_NAME}文件"
+else
+    echo "${TAR_NAME}文件不存在，继续执行"
+fi
+
+# 将项目根目录下**所有文件**打包（不含目录自身，直接打包内部全部内容）
+tar -zcvf "${TAR_NAME}" ./* || { echo "❌ 创建部署tar包失败"; exit 1; }
+echo "✅ 成功创建部署tar包: ${TAR_NAME}"
+
+# 校验Nginx目标目录是否存在，不存在则创建
+if [ ! -d "${NGINX_WEB_ROOT}" ]; then
+    mkdir -p "${NGINX_WEB_ROOT}"
+    echo "Nginx目标目录不存在，已创建: ${NGINX_WEB_ROOT}"
+fi
+
+# 备份现有站点内容
+cd "${NGINX_WEB_ROOT}" || { echo "❌ 无法进入Nginx目录 ${NGINX_WEB_ROOT}"; exit 1; }
+BACKUP_DIR="/tmp/nginx_backup_${PROJECT_PORT}_$(date +%Y%m%d%H%M%S)"
+if [ "$(ls -A)" ]; then
+    mkdir -p "${BACKUP_DIR}"
+    mv ./* "${BACKUP_DIR}/"
+    echo "✅ 已备份当前Nginx站点内容到: ${BACKUP_DIR}"
+fi
+
+# 本地复制tar包（本机不要用scp，改用cp）
+cp "${JENKINS_WORKSPACE}/${TAR_NAME}" "${NGINX_WEB_ROOT}/" || { echo "❌ 复制tar包到Nginx目录失败"; exit 1; }
+
+# 解压到nginx站点目录
+tar -zxvf "${TAR_NAME}" -C ./ || { echo "❌ 解压tar包失败"; exit 1; }
+rm -f "${TAR_NAME}"
+rm -f "${JENKINS_WORKSPACE}/${TAR_NAME}"
+echo "✅ 解压完成，已清理tar包临时文件"
+
+# 设置正确的文件权限 - 使用检测到的Nginx用户
+chown -R "${NGINX_USER}:${NGINX_USER}" "${NGINX_WEB_ROOT}" || {
+    echo "⚠️ 设置文件组所有者失败，尝试仅设置用户"
+    chown -R "${NGINX_USER}" "${NGINX_WEB_ROOT}" || {
+        echo "❌ 仍然无法设置文件所有者，请检查用户权限"
+        exit 1
+    }
+}
+chmod -R 755 "${NGINX_WEB_ROOT}" || { echo "❌ 设置文件权限失败"; exit 1; }
+echo "✅ 已设置正确的文件权限"
+
+# 检查入口文件index.html是否存在
+if [ -f "${NGINX_WEB_ROOT}/index.html" ]; then
+    echo "✅ 部署成功: index.html文件存在"
+else
+    echo "⚠️警告: index.html文件不存在，请确认项目根目录存在index.html"
+fi
+
+# 宝塔Nginx重载，失败不阻断构建
+echo "正在重新加载 Nginx 配置..."
+if /www/server/nginx/sbin/nginx -s reload 2>/dev/null; then
+    echo "✅ Nginx 配置重新加载成功"
+else
+    echo "⚠️警告: Nginx 配置 reload 失败，但项目文件已部署完成，不阻断构建"
+fi
+
+echo "🎉 部署完成 - $(date '+%Y-%m-%d %H:%M:%S')"
+```
+
 
 ### `fx67ll.com`在`github`中用的`Personal access tokens`是`jenkins-token-test`  
 ### `ssh钥匙`统一用`fx67ll ifnxs`  
