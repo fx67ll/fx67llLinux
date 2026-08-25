@@ -357,14 +357,20 @@ echo "检测到Nginx用户: $NGINX_USER"
 # 进入项目工作目录
 cd "${PROJECT_DIR}" || { echo "❌ 无法进入项目目录 ${PROJECT_DIR}"; exit 1; }
 
-# ========= 将 nav.fx67ll.com 内部全部文件提升到项目根目录，删除子文件夹 =========
-if [ -d "./${SUB_FOLDER_NAME}" ]; then
-    echo "✅ 检测到 ${SUB_FOLDER_NAME} 目录，开始将内部文件提升至项目根目录"
-    mv -f ./${SUB_FOLDER_NAME}/* ./ 2>/dev/null || true
-    rm -rf ./${SUB_FOLDER_NAME}
-    echo "✅ ${SUB_FOLDER_NAME} 文件已提取到根目录，文件夹已删除"
+# ========= 直接操作 nav.fx67ll.com 子目录，不再提升文件到根目录 =========
+NAV_DIR="./${SUB_FOLDER_NAME}"
+if [ ! -d "${NAV_DIR}" ]; then
+    echo "❌ nav.fx67ll.com源码目录不存在 ${NAV_DIR}"
+    exit 1
+fi
+
+# 【关键】直接修改子文件夹内部index.html，顺序提前，打包前完成替换
+NAV_INDEX="${NAV_DIR}/index.html"
+if [ -f "${NAV_INDEX}" ]; then
+    sed -i 's#fx67ll\.xyz-lib#nav.fx67ll.com#g' "${NAV_INDEX}"
+    echo "✅ 已将 nav.fx67ll.com/index.html 资源路径 fx67ll.xyz-lib → nav.fx67ll.com"
 else
-    echo "ℹ️ ${SUB_FOLDER_NAME} 目录不存在，跳过目录提升操作"
+    echo "⚠️警告: ${NAV_INDEX} 不存在，请检查源码"
 fi
 
 # 清理本地旧打包产物
@@ -375,14 +381,16 @@ else
     echo "dist.tar.gz 不存在，继续执行"
 fi
 
-# 打包主站，排除dist.tar.gz自身
-tar -zcvf dist.tar.gz --exclude=dist.tar.gz ./* || { echo "❌ 创建tar包失败"; exit 1; }
-echo "✅ 成功创建dist.tar.gz打包文件"
+# 打包：进入nav.fx67ll.com目录打包里面所有内容，不要把nav.fx67ll.com文件夹本身打进去
+cd "${NAV_DIR}" || exit 1
+tar -zcvf ../dist.tar.gz --exclude=dist.tar.gz ./* || { echo "❌ 创建tar包失败"; exit 1; }
+cd "${PROJECT_DIR}"
+echo "✅ 成功创建dist.tar.gz打包文件（内容来自nav.fx67ll.com/*）"
 
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
 
-# ---------------------- 部署主站 html-8070 ----------------------
-echo "====== 开始部署主站 html-8070 ======"
+# ---------------------- 部署主站 nav.fx67ll.com -> html-8070 ----------------------
+echo "====== 开始部署主站 nav.fx67ll.com html-8070 ======"
 NGINX_BACKUP="${TMP_BACKUP_DIR}/nginx_html8070_backup_${TIMESTAMP}"
 if [ -n "$(ls -A "${NGINX_WEB_ROOT}" 2>/dev/null)" ]; then
     mv "${NGINX_WEB_ROOT}"/* "${NGINX_BACKUP}" 2>/dev/null || true
@@ -404,16 +412,16 @@ chown -R "${NGINX_USER}:${NGINX_USER}" "${NGINX_WEB_ROOT}" || {
     }
 }
 chmod -R 755 "${NGINX_WEB_ROOT}" || { echo "❌ 设置主站文件权限失败"; exit 1; }
-echo "✅ 主站目录权限已设置"
+echo "✅ nav.fx67ll.com 主站目录权限已设置"
 
 if [ -f "${NGINX_WEB_ROOT}/index.html" ]; then
-    echo "✅ 主站部署校验通过: index.html 文件存在"
+    echo "✅ nav.fx67ll.com 主站部署校验通过: index.html 文件存在"
 else
-    echo "⚠️警告: 主站 index.html 文件不存在，请检查项目打包结构"
+    echo "⚠️警告: nav.fx67ll.com 主站 index.html 文件不存在，请检查项目打包结构"
 fi
 
-# ---------------------- 部署 resume.fx67ll.com -> html-528 新增模块 ----------------------
-echo "====== 开始部署 resume站点 html-528 ======"
+# ---------------------- 部署 resume.fx67ll.com -> html-528 平级模块 ----------------------
+echo "====== 开始部署 resume.fx67ll.com 站点 html-528 ======"
 RESUME_BACKUP="${TMP_BACKUP_DIR}/nginx_html528_backup_${TIMESTAMP}"
 if [ -d "${RESUME_SRC}" ]; then
     # 备份清空目标目录
@@ -431,9 +439,9 @@ if [ -d "${RESUME_SRC}" ]; then
     chmod -R 755 "${RESUME_WEB_ROOT}" || echo "⚠️ resume 设置权限警告"
 
     if [ -f "${RESUME_WEB_ROOT}/index.html" ]; then
-        echo "✅ resume站点部署校验通过: index.html 存在"
+        echo "✅ resume.fx67ll.com 站点部署校验通过: index.html 存在"
     else
-        echo "⚠️警告: resume站点 index.html 缺失，请检查resume.fx67ll.com/dist目录"
+        echo "⚠️警告: resume.fx67ll.com 站点 index.html 缺失，请检查resume.fx67ll.com/dist目录"
     fi
 else
     echo "⚠️警告: resume源目录不存在 ${RESUME_SRC}，跳过resume部署"
@@ -477,7 +485,7 @@ else
     echo "⚠️警告：Nginx reload失败，但业务文件已经部署完成，不影响静态资源访问"
 fi
 
-echo "====== 🎉 部署全部完成 - $(date '+%Y-%m-%d %H:%M:%S') ======"
+echo "====== 🎉 nav.fx67ll.com + resume.fx67ll.com + error-page 全部部署完成 - $(date '+%Y-%m-%d %H:%M:%S') ======"
 ```
 
 
